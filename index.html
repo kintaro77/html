@@ -216,7 +216,7 @@
         <span style="font-size: 14px; color: #555555;">(1환의 경우 S이상, 2환의 경우 S+ 이상)</span></p>
         <p>홈페이지 정보를 통해 추정하는 것이기에 오차가 발생할 수 있으므로<br>
         반드시 단순 참고용이나 재미로만 봐주시기를 부탁드리겠습니다 !!</p>
-        <p>검색되지 않는 페트의 경우 이름을 정확히 입력후 노환페트의 초기치와 성장율을 게임내 엘범에서 검색해 입력시 2환페트까지 성장확률을 계산하도록 해 두었습니다.<br>
+        <p>검색되지 않는 페트의 경우 이름을 정확히 입력후 노환페트의 초기치 and 성장율을 게임내 엘범에서 검색해 입력시 2환페트까지 성장확률을 계산하도록 해 두었습니다.<br>
         새페트의 경우 계수를 찾아내지 못해 계산이 불가할수 있습니다.</p>
         <p style="color: #2980b9; font-weight: bold;">⚠️ 디비에 없는 페트를 최초로 계산했을경우 디비에 자동저장되므로 페트이름은 정확하게 입력 부탁드립니다.</p>
         <p>사용된 페트의 데이터는 아래 링크를 통해 확인 하실 수 있습니다.<br>
@@ -321,22 +321,6 @@
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwKbFkQC2iAc3EM8SR-93F7ZF57mHm3YL1veB2aNOdP5U5nCQC0PE_EVGREMH_9Hyzl/exec";
 
-    function getChosung(str) {
-        const BASE_CODE = 0xAC00; 
-        const LAST_CODE = 0xD7A3; 
-        const CHOSUNG_LIST = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-        let result = "";
-        for (let i = 0; i < str.length; i++) {
-            const code = str.charCodeAt(i);
-            if (code >= BASE_CODE && code <= LAST_CODE) {
-                const offset = code - BASE_CODE;
-                const chosungIndex = Math.floor(offset / 588);
-                result += CHOSUNG_LIST[chosungIndex];
-            } else { result += str[i]; }
-        }
-        return result;
-    }
-
     let petData = {};
 
     const petNameInput = document.getElementById('pet-name');
@@ -352,14 +336,11 @@
                             petNameInput.placeholder = "⚠️ 시트 형식 오류";
                             return;
                         }
-
                         const rows = json.table.rows;
                         let loadedCount = 0;
-
                         for (let i = 0; i < rows.length; i++) {
                             const rowCols = rows[i].c;
                             if (!rowCols) continue;
-                            
                             const getVal = (idx) => {
                                 if (!rowCols[idx]) return NaN;
                                 const v = rowCols[idx].v;
@@ -368,54 +349,35 @@
                                 if (f !== null && f !== undefined) return Number(f.toString().replace(/,/g, ''));
                                 return NaN;
                             };
-
                             let name = '';
                             if (rowCols[0] && rowCols[0].v !== null && rowCols[0].v !== undefined) {
                                 name = String(rowCols[0].v).trim();
                             } else if (rowCols[0] && rowCols[0].f !== null && rowCols[0].f !== undefined) {
                                 name = String(rowCols[0].f).trim();
                             }
-
                             if (!name || name === "이름" || name === "페트명" || name.includes("계수")) continue;
-
                             const initC = getVal(1);
                             const hpC   = getVal(2);
                             const atkC  = getVal(3);
                             const defC  = getVal(4);
                             const agiC  = getVal(5);
-
                             if (!isNaN(initC) && !isNaN(hpC)) {
-                                petData[name] = {
-                                    initialCoefficient: initC,
-                                    healthCoefficient: hpC,
-                                    attackCoefficient: atkC,
-                                    defenseCoefficient: defC,
-                                    agilityCoefficient: agiC
-                                };
+                                petData[name] = { initialCoefficient: initC, healthCoefficient: hpC, attackCoefficient: atkC, defenseCoefficient: defC, agilityCoefficient: agiC };
                                 loadedCount++;
                             }
                         }
-
                         if (loadedCount > 0) {
                             petNameInput.placeholder = "이름을 입력하면 자동 로드됩니다.";
                             petNameInput.disabled = false;
-                        } else {
-                            petNameInput.placeholder = "⚠️ 시트 데이터 읽기 실패";
                         }
-                    } catch (e) {
-                        console.error("DB Load Error", e);
-                        petNameInput.placeholder = "⚠️ DB 연결 에러";
-                    }
+                    } catch (e) { console.error(e); }
                 }
             }
         }
     };
 
     function setInputsLock(isLock) {
-        const targetIds = [
-            'base-hp', 'base-atk', 'base-def', 'base-agi',
-            'base-g-hp', 'base-g-atk', 'base-g-def', 'base-g-agi'
-        ];
+        const targetIds = ['base-hp', 'base-atk', 'base-def', 'base-agi', 'base-g-hp', 'base-g-atk', 'base-g-def', 'base-g-agi'];
         targetIds.forEach(id => {
             const el = document.getElementById(id);
             if (isLock) el.setAttribute('readonly', true);
@@ -424,11 +386,7 @@
     }
 
     function clearInputs() {
-        const targetIds = [
-            'base-hp', 'base-atk', 'base-def', 'base-agi',
-            'base-g-hp', 'base-g-atk', 'base-g-def', 'base-g-agi',
-            'my-hp', 'my-atk', 'my-def', 'my-agi'
-        ];
+        const targetIds = ['base-hp', 'base-atk', 'base-def', 'base-agi', 'base-g-hp', 'base-g-atk', 'base-g-def', 'base-g-agi', 'my-hp', 'my-atk', 'my-def', 'my-agi'];
         targetIds.forEach(id => { document.getElementById(id).value = ""; });
     }
 
@@ -458,200 +416,108 @@
     petNameInput.addEventListener('input', function() {
         const value = this.value.trim();
         suggestionsUl.innerHTML = '';
-
         if (!value) {
-            suggestionsUl.style.display = 'none';
-            setInputsLock(false);
-            clearInputs();
-            clearRebirthInputs();
-            document.getElementById('rebirth-info-section').style.display = 'none';
-            return;
+            suggestionsUl.style.display = 'none'; setInputsLock(false); clearInputs(); clearRebirthInputs();
+            document.getElementById('rebirth-info-section').style.display = 'none'; return;
         }
-
         const matches = Object.keys(petData).filter(name => name.includes(value));
-
         if (matches.length > 0) {
             matches.forEach(match => {
-                const li = document.createElement('li');
-                li.innerText = match;
-                li.addEventListener('click', function() {
-                    petNameInput.value = match;
-                    suggestionsUl.style.display = 'none';
-                    checkAndApplyState(); 
-                });
+                const li = document.createElement('li'); li.innerText = match;
+                li.addEventListener('click', function() { petNameInput.value = match; suggestionsUl.style.display = 'none'; checkAndApplyState(); });
                 suggestionsUl.appendChild(li);
             });
             suggestionsUl.style.display = 'block';
-        } else {
-            suggestionsUl.style.display = 'none';
-        }
+        } else { suggestionsUl.style.display = 'none'; }
         checkAndApplyState();
     });
 
-    rebirthSelect.addEventListener('change', function() {
-        updateRebirthStats();
-    });
-
-    const baseInputIds = ['base-hp', 'base-atk', 'base-def', 'base-agi', 'base-g-hp', 'base-g-atk', 'base-g-def', 'base-g-agi'];
-    baseInputIds.forEach(id => {
+    rebirthSelect.addEventListener('change', updateRebirthStats);
+    ['base-hp', 'base-atk', 'base-def', 'base-agi', 'base-g-hp', 'base-g-atk', 'base-g-def', 'base-g-agi'].forEach(id => {
         document.getElementById(id).addEventListener('input', updateRebirthStats);
     });
-
-    document.addEventListener('click', function(e) {
-        if (e.target !== petNameInput) suggestionsUl.style.display = 'none';
-    });
+    document.addEventListener('click', (e) => { if (e.target !== petNameInput) suggestionsUl.style.display = 'none'; });
 
     function applyPetStats(name) {
-        const data = petData[name];
-        if (!data) return;
-
+        const data = petData[name]; if (!data) return;
         setInputsLock(true);
         const initC = data.initialCoefficient;
-        
-        const hpC = data.healthCoefficient;
-        const atkC = data.attackCoefficient;
-        const defC = data.defenseCoefficient;
-        const agiC = data.agilityCoefficient;
+        const hpC = data.healthCoefficient; const atkC = data.attackCoefficient; const defC = data.defenseCoefficient; const agiC = data.agilityCoefficient;
 
         const initialAgilityRaw = ((agiC + 4.5) * initC) / 100;
         const initialHealthRaw = ((hpC + 4.5) * initC) / 100;
         const initialAttackRaw = ((atkC + 4.5) * initC) / 100;
         const initialDefenseRaw = ((defC + 4.5) * initC) / 100;
 
-        const finalHp = Math.floor(initialHealthRaw * 4 + initialAttackRaw + initialDefenseRaw + initialAgilityRaw);
-        const finalAtk = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw + initialDefenseRaw * 0.1 + initialAgilityRaw * 0.05);
-        const finalDef = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw * 0.1 + initialDefenseRaw + initialAgilityRaw * 0.05);
-        const finalAgi = Math.floor(initialAgilityRaw);
+        document.getElementById('base-hp').value = Math.floor(initialHealthRaw * 4 + initialAttackRaw + initialDefenseRaw + initialAgilityRaw);
+        document.getElementById('base-atk').value = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw + initialDefenseRaw * 0.1 + initialAgilityRaw * 0.05);
+        document.getElementById('base-def').value = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw * 0.1 + initialDefenseRaw + initialAgilityRaw * 0.05);
+        document.getElementById('base-agi').value = Math.floor(initialAgilityRaw);
 
-        document.getElementById('base-hp').value = finalHp;
-        document.getElementById('base-atk').value = finalAtk;
-        document.getElementById('base-def').value = finalDef;
-        document.getElementById('base-agi').value = finalAgi;
-
-        // 편의기능: 내 펫의 1렙 표기 스탯에 노환 베이스 S급 1렙 초기치를 자동 입력
-        document.getElementById('my-hp').value = finalHp;
-        document.getElementById('my-atk').value = finalAtk;
-        document.getElementById('my-def').value = finalDef;
-        document.getElementById('my-agi').value = finalAgi;
+        document.getElementById('my-hp').value = document.getElementById('base-hp').value;
+        document.getElementById('my-atk').value = document.getElementById('base-atk').value;
+        document.getElementById('my-def').value = document.getElementById('base-def').value;
+        document.getElementById('my-agi').value = document.getElementById('base-agi').value;
 
         const sumC = hpC + atkC + defC + agiC;
         const bAvg = sumC >= 100 ? 475 : sumC >= 95 ? 495 : sumC >= 90 ? 515 : sumC >= 85 ? 535 : sumC >= 80 ? 555 : 575;
 
-        const gAgi_raw = (agiC + 4.5) * bAvg / 10000;
-        const gDef_raw = (defC + 4.5) * bAvg / 10000;
-        const gAtk_raw = (atkC + 4.5) * bAvg / 10000;
-        const gHp_raw = (hpC + 4.5) * bAvg / 10000;
-
-        const cgAgi = gAgi_raw;
-        const cgDef = gHp_raw * 0.1 + gAtk_raw * 0.1 + gDef_raw + gAgi_raw * 0.05;
-        const cgAtk = gHp_raw * 0.1 + gAtk_raw + gDef_raw * 0.1 + gAgi_raw * 0.05;
-        const cgHp = gHp_raw * 4 + gAtk_raw + gDef_raw + gAgi_raw;
+        const cgAgi = (agiC + 4.5) * bAvg / 10000;
+        const cgDef = ((hpC + 4.5) * 0.1 + (atkC + 4.5) * 0.1 + (defC + 4.5) + (agiC + 4.5) * 0.05) * bAvg / 10000;
+        const cgAtk = ((hpC + 4.5) * 0.1 + (atkC + 4.5) + (defC + 4.5) * 0.1 + (agiC + 4.5) * 0.05) * bAvg / 10000;
+        const cgHp = ((hpC + 4.5) * 4 + (atkC + 4.5) + (defC + 4.5) + (agiC + 4.5)) * bAvg / 10000;
 
         document.getElementById('base-g-hp').value = cgHp.toFixed(3);
         document.getElementById('base-g-atk').value = cgAtk.toFixed(3);
         document.getElementById('base-g-def').value = cgDef.toFixed(3);
         document.getElementById('base-g-agi').value = cgAgi.toFixed(3);
-
         updateRebirthStats();
     }
 
     function updateRebirthStats() {
-        const rVal = rebirthSelect.value;
-        const infoSection = document.getElementById('rebirth-info-section');
-        const petName = petNameInput.value.trim();
-
+        const rVal = rebirthSelect.value; const infoSection = document.getElementById('rebirth-info-section'); const petName = petNameInput.value.trim();
         if (rVal === "none") {
             infoSection.style.display = 'none';
-            // 노환으로 변경 시 내 펫 1렙 스탯을 노환 S급 수치로 자동 변경
             const baseHp = document.getElementById('base-hp').value;
             if (baseHp) {
-                document.getElementById('my-hp').value = baseHp;
-                document.getElementById('my-atk').value = document.getElementById('base-atk').value;
-                document.getElementById('my-def').value = document.getElementById('base-def').value;
-                document.getElementById('my-agi').value = document.getElementById('base-agi').value;
+                document.getElementById('my-hp').value = baseHp; document.getElementById('my-atk').value = document.getElementById('base-atk').value;
+                document.getElementById('my-def').value = document.getElementById('base-def').value; document.getElementById('my-agi').value = document.getElementById('base-agi').value;
             }
             return;
         }
-
-        const displays = document.querySelectorAll('.rebirth-text-display');
-        displays.forEach(el => el.innerText = rVal === "1" ? "1환" : "2환");
+        document.querySelectorAll('.rebirth-text-display').forEach(el => el.innerText = rVal === "1" ? "1환" : "2환");
         infoSection.style.display = 'grid';
 
-        const baseHp = Number(document.getElementById('base-hp').value);
-        const baseAtk = Number(document.getElementById('base-atk').value);
-        const baseDef = Number(document.getElementById('base-def').value);
-        const baseAgi = Number(document.getElementById('base-agi').value);
-        const gHp = Number(document.getElementById('base-g-hp').value);
-        const gAtk = Number(document.getElementById('base-g-atk').value);
-        const gDef = Number(document.getElementById('base-g-def').value);
-        const gAgi = Number(document.getElementById('base-g-agi').value);
+        const baseHp = Number(document.getElementById('base-hp').value); const baseAtk = Number(document.getElementById('base-atk').value);
+        const baseDef = Number(document.getElementById('base-def').value); const baseAgi = Number(document.getElementById('base-agi').value);
+        const gHp = Number(document.getElementById('base-g-hp').value); const gAtk = Number(document.getElementById('base-g-atk').value);
+        const gDef = Number(document.getElementById('base-g-def').value); const gAgi = Number(document.getElementById('base-g-agi').value);
 
-        if (!baseHp || !baseAtk || !baseDef || !baseAgi || !gHp || !gAtk || !gDef || !gAgi) {
-            clearRebirthInputs();
-            return;
-        }
+        if (!baseHp || !baseAtk || !baseDef || !baseAgi || !gHp || !gAtk || !gDef || !gAgi) { clearRebirthInputs(); return; }
 
-        let coefs = null;
-        if (petName && petData[petName]) {
-            const p = petData[petName];
-            coefs = { initC: p.initialCoefficient, hpC: p.healthCoefficient, atkC: p.attackCoefficient, defC: p.defenseCoefficient, agiC: p.agilityCoefficient };
-        } else {
-            coefs = bruteForceCoefficients(baseHp, baseAtk, baseDef, baseAgi, gHp, gAtk, gDef, gAgi);
-        }
+        let coefs = (petName && petData[petName]) ? { initC: petData[petName].initialCoefficient, hpC: petData[petName].healthCoefficient, atkC: petData[petName].attackCoefficient, defC: petData[petName].defenseCoefficient, agiC: petData[petName].agilityCoefficient } : bruteForceCoefficients(baseHp, baseAtk, baseDef, baseAgi, gHp, gAtk, gDef, gAgi);
+        if (!coefs) { clearRebirthInputs(); return; }
 
-        if (!coefs) {
-            clearRebirthInputs();
-            return;
-        }
+        let hpBonus = rVal === "1" ? 2 : 8, atkBonus = rVal === "1" ? 4 : 13, defBonus = rVal === "1" ? 4 : 13, agiBonus = rVal === "1" ? 2 : 8;
+        const hpC = coefs.hpC + hpBonus, atkC = coefs.atkC + atkBonus, defC = coefs.defC + defBonus, agiC = coefs.agiC + agiBonus, initC = coefs.initC;
 
-        // 💡 수정 완료: 바우트 실측 기반 능력치별 정밀 분리 환생 보정 상수 대입
-        let hpBonus = 0, atkBonus = 0, defBonus = 0, agiBonus = 0;
-        if (rVal === "1") {
-            hpBonus = 2; atkBonus = 4; defBonus = 4; agiBonus = 2;
-        } else if (rVal === "2") {
-            hpBonus = 8; atkBonus = 13; defBonus = 13; agiBonus = 8;
-        }
+        document.getElementById('r-base-hp').value = Math.floor(((hpC + 4.5)*initC/100)*4 + ((atkC + 4.5)*initC/100) + ((defC + 4.5)*initC/100) + ((agiC + 4.5)*initC/100));
+        document.getElementById('r-base-atk').value = Math.floor(((hpC + 4.5)*initC/100)*0.1 + ((atkC + 4.5)*initC/100) + ((defC + 4.5)*initC/100)*0.1 + ((agiC + 4.5)*initC/100)*0.05);
+        document.getElementById('r-base-def').value = Math.floor(((hpC + 4.5)*initC/100)*0.1 + ((atkC + 4.5)*initC/100)*0.1 + ((defC + 4.5)*initC/100) + ((agiC + 4.5)*initC/100)*0.05);
+        document.getElementById('r-base-agi').value = Math.floor((agiC + 4.5)*initC/100);
 
-        const hpC = coefs.hpC + hpBonus;
-        const atkC = coefs.atkC + atkBonus;
-        const defC = coefs.defC + defBonus;
-        const agiC = coefs.agiC + agiBonus;
-        const initC = coefs.initC; // 초기치 계수 보너스 없음 (+0)
+        document.getElementById('my-hp').value = document.getElementById('r-base-hp').value;
+        document.getElementById('my-atk').value = document.getElementById('r-base-atk').value;
+        document.getElementById('my-def').value = document.getElementById('r-base-def').value;
+        document.getElementById('my-agi').value = document.getElementById('r-base-agi').value;
 
-        const initialAgilityRaw = ((agiC + 4.5) * initC) / 100;
-        const initialHealthRaw = ((hpC + 4.5) * initC) / 100;
-        const initialAttackRaw = ((atkC + 4.5) * initC) / 100;
-        const initialDefenseRaw = ((defC + 4.5) * initC) / 100;
-
-        const finalHp = Math.floor(initialHealthRaw * 4 + initialAttackRaw + initialDefenseRaw + initialAgilityRaw);
-        const finalAtk = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw + initialDefenseRaw * 0.1 + initialAgilityRaw * 0.05);
-        const finalDef = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw * 0.1 + initialDefenseRaw + initialAgilityRaw * 0.05);
-        const finalAgi = Math.floor(initialAgilityRaw);
-
-        document.getElementById('r-base-hp').value = finalHp;
-        document.getElementById('r-base-atk').value = finalAtk;
-        document.getElementById('r-base-def').value = finalDef;
-        document.getElementById('r-base-agi').value = finalAgi;
-
-        // 환생을 선택하면 내 펫의 1렙 표기 스탯에도 해당 환생의 S급 초기치를 자동 기입
-        document.getElementById('my-hp').value = finalHp;
-        document.getElementById('my-atk').value = finalAtk;
-        document.getElementById('my-def').value = finalDef;
-        document.getElementById('my-agi').value = finalAgi;
-
-        // 💡 수정 완료: bAvg 계산 시 환생 상태에 무관하게 항상 '순수 노환 계수의 합산'으로 랭크 결정 고정
         const sumC = coefs.hpC + coefs.atkC + coefs.defC + coefs.agiC;
         const bAvg = sumC >= 100 ? 475 : sumC >= 95 ? 495 : sumC >= 90 ? 515 : sumC >= 85 ? 535 : sumC >= 80 ? 555 : 575;
 
-        const gAgi_raw = (agiC + 4.5) * bAvg / 10000;
-        const gDef_raw = (defC + 4.5) * bAvg / 10000;
-        const gAtk_raw = (atkC + 4.5) * bAvg / 10000;
-        const gHp_raw = (hpC + 4.5) * bAvg / 10000;
-
-        const cgAgi = gAgi_raw;
-        const cgDef = gHp_raw * 0.1 + gAtk_raw * 0.1 + gDef_raw + gAgi_raw * 0.05;
-        const cgAtk = gHp_raw * 0.1 + gAtk_raw + gDef_raw * 0.1 + gAgi_raw * 0.05;
-        const cgHp = gHp_raw * 4 + gAtk_raw + gDef_raw + gAgi_raw;
+        const cgAgi = (agiC + 4.5) * bAvg / 10000;
+        const cgDef = ((hpC + 4.5) * 0.1 + (atkC + 4.5) * 0.1 + (defC + 4.5) + (agiC + 4.5) * 0.05) * bAvg / 10000;
+        const cgAtk = ((hpC + 4.5) * 0.1 + (atkC + 4.5) + (defC + 4.5) * 0.1 + (agiC + 4.5) * 0.05) * bAvg / 10000;
+        const cgHp = ((hpC + 4.5) * 4 + (atkC + 4.5) + (defC + 4.5) + (agiC + 4.5)) * bAvg / 10000;
 
         document.getElementById('r-base-g-hp').value = cgHp.toFixed(3);
         document.getElementById('r-base-g-atk').value = cgAtk.toFixed(3);
@@ -663,48 +529,20 @@
         let foundCandidates = [];
         for (let initC = 10; initC <= 60; initC++) {
             for (let agiC = 0; agiC <= 75; agiC++) {
-                let initialAgilityRaw = ((agiC + 4.5) * initC) / 100;
-                if (Math.floor(initialAgilityRaw) !== baseAgi) continue;
-
+                if (Math.floor(((agiC + 4.5) * initC) / 100) !== baseAgi) continue;
                 for (let hpC = 0; hpC <= 75; hpC++) {
-                    let initialHealthRaw = ((hpC + 4.5) * initC) / 100;
-                    if (initialHealthRaw * 4 > baseHp) continue; 
-
                     for (let atkC = 0; atkC <= 75; atkC++) {
-                        let initialAttackRaw = ((atkC + 4.5) * initC) / 100;
-                        if (initialAttackRaw > baseAtk) continue; 
-
                         for (let defC = 0; defC <= 75; defC++) {
-                            let initialDefenseRaw = ((defC + 4.5) * initC) / 100;
-                            if (initialDefenseRaw > baseDef) continue; 
-
-                            let cHp = Math.floor(initialHealthRaw * 4 + initialAttackRaw + initialDefenseRaw + initialAgilityRaw);
-                            if (cHp !== baseHp) continue;
-
-                            let cAtk = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw + initialDefenseRaw * 0.1 + initialAgilityRaw * 0.05);
-                            if (cAtk !== baseAtk) continue;
-
-                            let cDef = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw * 0.1 + initialDefenseRaw + initialAgilityRaw * 0.05);
-                            if (cDef !== baseDef) continue;
+                            let iHp = ((hpC + 4.5) * initC) / 100, iAtk = ((atkC + 4.5) * initC) / 100, iDef = ((defC + 4.5) * initC) / 100, iAgi = ((agiC + 4.5) * initC) / 100;
+                            if (Math.floor(iHp * 4 + iAtk + iDef + iAgi) !== baseHp) continue;
+                            if (Math.floor(iHp * 0.1 + iAtk + iDef * 0.1 + iAgi * 0.05) !== baseAtk) continue;
+                            if (Math.floor(iHp * 0.1 + iAtk * 0.1 + iDef + iAgi * 0.05) !== baseDef) continue;
 
                             let sumC = hpC + atkC + defC + agiC;
                             let bAvg = sumC >= 100 ? 475 : sumC >= 95 ? 495 : sumC >= 90 ? 515 : sumC >= 85 ? 535 : sumC >= 80 ? 555 : 575;
+                            let cgAgi = iAgi * bAvg / initC / 100, cgDef = (iHp*0.1 + iAtk*0.1 + iDef + iAgi*0.05)*bAvg/initC/100, cgAtk = (iHp*0.1 + iAtk + iDef*0.1 + iAgi*0.05)*bAvg/initC/100, cgHp = (iHp*4 + iAtk + iDef + iAgi)*bAvg/initC/100;
 
-                            let gAgi_raw = (agiC + 4.5) * bAvg / 10000;
-                            let gDef_raw = (defC + 4.5) * bAvg / 10000;
-                            let gAtk_raw = (atkC + 4.5) * bAvg / 10000;
-                            let gHp_raw = (hpC + 4.5) * bAvg / 10000;
-
-                            let cgAgi = gAgi_raw;
-                            let cgDef = gHp_raw * 0.1 + gAtk_raw * 0.1 + gDef_raw + gAgi_raw * 0.05;
-                            let cgAtk = gHp_raw * 0.1 + gAtk_raw + gDef_raw * 0.1 + gAgi_raw * 0.05;
-                            let cgHp = gHp_raw * 4 + gAtk_raw + gDef_raw + gAgi_raw;
-
-                            if (Math.abs(cgAgi - baseGAgi) > 0.008) continue;
-                            if (Math.abs(cgDef - baseGDef) > 0.008) continue;
-                            if (Math.abs(cgAtk - baseGAtk) > 0.008) continue;
-                            if (Math.abs(cgHp - baseGHp) > 0.008) continue;
-
+                            if (Math.abs(cgAgi - baseGAgi) > 0.008 || Math.abs(cgDef - baseGDef) > 0.008 || Math.abs(cgAtk - baseGAtk) > 0.008 || Math.abs(cgHp - baseGHp) > 0.008) continue;
                             foundCandidates.push({ initC, hpC, atkC, defC, agiC });
                         }
                     }
@@ -716,18 +554,12 @@
 
     function formatPercentage(num) {
         if (num === 0) return "0.0%";
-        let str = num.toFixed(20);
-        let decimalIndex = str.indexOf('.');
-        if (decimalIndex === -1) return str + '.0%';
-        let decimals = str.substring(decimalIndex + 1);
-        let firstNonZero = decimals.search(/[1-9]/);
+        let str = num.toFixed(20), decimalIndex = str.indexOf('.');
+        let decimals = str.substring(decimalIndex + 1), firstNonZero = decimals.search(/[1-9]/);
         if (firstNonZero === -1) return "0.0%";
-        let significantDigit = decimals[firstNonZero];
-        let nextDigit = parseInt(decimals[firstNonZero + 1]) || 0;
-        if (nextDigit >= 5) {
-            significantDigit = (parseInt(significantDigit) + 1).toString();
-        }
-        return str.substring(0, decimalIndex + 1 + firstNonZero) + significantDigit + '%';
+        let sig = decimals[firstNonZero], next = parseInt(decimals[firstNonZero + 1]) || 0;
+        if (next >= 5) sig = (parseInt(sig) + 1).toString();
+        return str.substring(0, decimalIndex + 1 + firstNonZero) + sig + '%';
     }
 
     document.getElementById('btn-calc').addEventListener('click', () => {
@@ -737,213 +569,121 @@
         setTimeout(() => {
             const petName = document.getElementById('pet-name').value.trim();
             const rebirthValue = rebirthSelect.value;
-            const rebirthText = rebirthSelect.options[rebirthSelect.selectedIndex].text;
+            document.getElementById('r-pet-display').innerText = petName ? `[${petName} / ${rebirthSelect.options[rebirthSelect.selectedIndex].text}]` : `[${rebirthSelect.options[rebirthSelect.selectedIndex].text}]`;
+
+            let baseHp = Number(document.getElementById(rebirthValue==="none"?'base-hp':'r-base-hp').value);
+            let baseAtk = Number(document.getElementById(rebirthValue==="none"?'base-atk':'r-base-atk').value);
+            let baseDef = Number(document.getElementById(rebirthValue==="none"?'base-def':'r-base-def').value);
+            let baseAgi = Number(document.getElementById(rebirthValue==="none"?'base-agi':'r-base-agi').value);
             
-            document.getElementById('r-pet-display').innerText = petName ? `[${petName} / ${rebirthText}]` : `[${rebirthText}]`;
+            const netHp = Number(document.getElementById('my-hp').value) - Number(document.getElementById('b-hp').value);
+            const netAtk = Number(document.getElementById('my-atk').value) - Number(document.getElementById('b-atk').value);
+            const netDef = Number(document.getElementById('my-def').value) - Number(document.getElementById('b-def').value);
+            const netAgi = Number(document.getElementById('my-agi').value) - Number(document.getElementById('b-agi').value);
 
-            let baseHp, baseAtk, baseDef, baseAgi, gHp, gAtk, gDef, gAgi;
-            if (rebirthValue === "none") {
-                baseHp = Number(document.getElementById('base-hp').value);
-                baseAtk = Number(document.getElementById('base-atk').value);
-                baseDef = Number(document.getElementById('base-def').value);
-                baseAgi = Number(document.getElementById('base-agi').value);
-                gHp = Number(document.getElementById('base-g-hp').value);
-                gAtk = Number(document.getElementById('base-g-atk').value);
-                gDef = Number(document.getElementById('base-g-def').value);
-                gAgi = Number(document.getElementById('base-g-agi').value);
-            } else {
-                baseHp = Number(document.getElementById('r-base-hp').value);
-                baseAtk = Number(document.getElementById('r-base-atk').value);
-                baseDef = Number(document.getElementById('r-base-def').value);
-                baseAgi = Number(document.getElementById('r-base-agi').value);
-                gHp = Number(document.getElementById('r-base-g-hp').value);
-                gAtk = Number(document.getElementById('r-base-g-atk').value);
-                gDef = Number(document.getElementById('r-base-g-def').value);
-                gAgi = Number(document.getElementById('r-base-g-agi').value);
+            let coefs = (petName && petData[petName]) ? { initC: petData[petName].initialCoefficient, hpC: petData[petName].healthCoefficient, atkC: petData[petName].attackCoefficient, defC: petData[petName].defenseCoefficient, agiC: petData[petName].agilityCoefficient } : bruteForceCoefficients(Number(document.getElementById('base-hp').value), Number(document.getElementById('base-atk').value), Number(document.getElementById('base-def').value), Number(document.getElementById('base-agi').value), Number(document.getElementById('base-g-hp').value), Number(document.getElementById('base-g-atk').value), Number(document.getElementById('base-g-def').value), Number(document.getElementById('base-g-agi').value));
+
+            if(coefs && !petData[petName] && petName) {
+                petData[petName] = { initialCoefficient: coefs.initC, healthCoefficient: coefs.hpC, attackCoefficient: coefs.atkC, defenseCoefficient: coefs.defC, agilityCoefficient: coefs.agiC };
+                fetch(`${WEB_APP_URL}?name=${encodeURIComponent(petName)}&initC=${coefs.initC}&hpC=${coefs.hpC}&atkC=${coefs.atkC}&defC=${coefs.defC}&agiC=${coefs.agiC}`, { mode: 'no-cors' });
             }
 
-            const myHp = Number(document.getElementById('my-hp').value);
-            const myAtk = Number(document.getElementById('my-atk').value);
-            const myDef = Number(document.getElementById('my-def').value);
-            const myAgi = Number(document.getElementById('my-agi').value);
-
-            const bAtk = Number(document.getElementById('b-atk').value);
-            const bDef = Number(document.getElementById('b-def').value);
-            const bAgi = Number(document.getElementById('b-agi').value);
-            const bHp = Number(document.getElementById('b-hp').value);
-
-            // 💡 표기 스탯에서 보정치를 뺀 '순수 스탯'을 사전 정의하여, 시뮬레이션 매칭 시 동일한 기준으로 판단하게 합니다.
-            const netHp = myHp - bHp;
-            const netAtk = myAtk - bAtk;
-            const netDef = myDef - bDef;
-            const netAgi = myAgi - bAgi;
-
-            const isDbPet = !!(petName && petData[petName]);
-
-            let coefs = null;
-            if (isDbPet) {
-                const p = petData[petName];
-                let hpBonus = 0, atkBonus = 0, defBonus = 0, agiBonus = 0;
-                if (rebirthValue === "1") {
-                    hpBonus = 2; atkBonus = 4; defBonus = 4; agiBonus = 2;
-                } else if (rebirthValue === "2") {
-                    hpBonus = 8; atkBonus = 13; defBonus = 13; agiBonus = 8;
-                }
-
-                coefs = {
-                    initC: p.initialCoefficient,
-                    hpC: p.healthCoefficient + hpBonus,
-                    atkC: p.attackCoefficient + atkBonus,
-                    defC: p.defenseCoefficient + defBonus,
-                    agiC: p.agilityCoefficient + agiBonus
-                };
-            } else {
-                coefs = bruteForceCoefficients(
-                    Number(document.getElementById('base-hp').value), 
-                    Number(document.getElementById('base-atk').value), 
-                    Number(document.getElementById('base-def').value), 
-                    Number(document.getElementById('base-agi').value), 
-                    Number(document.getElementById('base-g-hp').value), 
-                    Number(document.getElementById('base-g-atk').value), 
-                    Number(document.getElementById('base-g-def').value), 
-                    Number(document.getElementById('base-g-agi').value)
-                );
-                
-                if (coefs && petName) {
-                    petData[petName] = {
-                        initialCoefficient: coefs.initC,
-                        healthCoefficient: coefs.hpC,
-                        attackCoefficient: coefs.atkC,
-                        defenseCoefficient: coefs.defC,
-                        agilityCoefficient: coefs.agiC
-                    };
-                    
-                    const fetchUrl = `${WEB_APP_URL}?name=${encodeURIComponent(petName)}&initC=${coefs.initC}&hpC=${coefs.hpC}&atkC=${coefs.atkC}&defC=${coefs.defC}&agiC=${coefs.agiC}`;
-                    fetch(fetchUrl, { mode: 'no-cors' }).then(() => console.log('새 펫 DB 등록 완료')).catch(e => console.warn(e));
-
-                    let hpBonus = 0, atkBonus = 0, defBonus = 0, agiBonus = 0;
-                    if (rebirthValue === "1") {
-                        hpBonus = 2; atkBonus = 4; defBonus = 4; agiBonus = 2;
-                    } else if (rebirthValue === "2") {
-                        hpBonus = 8; atkBonus = 13; defBonus = 13; agiBonus = 8;
-                    }
-                    coefs.hpC += hpBonus;
-                    coefs.atkC += atkBonus;
-                    coefs.defC += defBonus;
-                    coefs.agiC += agiBonus;
-                }
+            if (coefs && rebirthValue !== "none") {
+                let hpBonus = rebirthValue === "1" ? 2 : 8, atkBonus = rebirthValue === "1" ? 4 : 13, defBonus = rebirthValue === "1" ? 4 : 13, agiBonus = rebirthValue === "1" ? 2 : 8;
+                coefs.hpC += hpBonus; coefs.atkC += atkBonus; coefs.defC += defBonus; coefs.agiC += agiBonus;
             }
 
-            let statusMsg = "";
             const wrapper = document.getElementById('probability-wrapper');
-
-            if (!coefs && !isDbPet) {
+            if (!coefs) {
                 wrapper.innerHTML = `<div class="error-highlight">안잡히는 초기치일걸요~</div>`;
-                statusMsg = "<span style='color:#e74c3c;'>분석 실패: 유효하지 않은 스탯 조합입니다.</span>";
+                document.getElementById('status-msg').innerHTML = "<span style='color:#e74c3c;'>분석 실패</span>";
             } else {
-                statusMsg = "<span style='color:#27ae60;'>성공!</span>";
+                let exactMatchCount = 0, totalPossibleCases = 0, hallucinationCases = 0;
+                let absoluteMinScore = Infinity, absoluteMaxScore = -Infinity, totalAvgScoreSum = 0;
 
-                let exactMatchCount = 0;
-                let totalPossibleCases = 0;
-                let hallucinationCases = 0;
+                let pureHpC = coefs.hpC, pureAtkC = coefs.atkC, pureDefC = coefs.defC, pureAgiC = coefs.agiC;
+                if (rebirthValue !== "none") {
+                    let hpB = rebirthValue === "1" ? 2 : 8, atkB = rebirthValue === "1" ? 4 : 13, defB = rebirthValue === "1" ? 4 : 13, agiB = rebirthValue === "1" ? 2 : 8;
+                    pureHpC -= hpB; pureAtkC -= atkB; pureDefC -= defB; pureAgiC -= agiB;
+                }
+                const baseSum = pureHpC + pureAtkC + pureDefC + pureAgiC;
+                let minB = 470, maxB = 520;
+                if (baseSum >= 100) { minB = 450; maxB = 500; }
+                else if (baseSum >= 95) { minB = 470; maxB = 520; }
+                else if (baseSum >= 90) { minB = 490; maxB = 540; }
+                else if (baseSum >= 85) { minB = 510; maxB = 560; }
+                else if (baseSum >= 80) { minB = 530; maxB = 580; }
+                else { minB = 550; maxB = 600; }
 
-                for (let healthRandom = -2; healthRandom <= 2; healthRandom++) {
-                    for (let attackRandom = -2; attackRandom <= 2; attackRandom++) {
-                        for (let defenseRandom = -2; defenseRandom <= 2; defenseRandom++) {
-                            for (let agilityRandom = -2; agilityRandom <= 2; agilityRandom++) {
-                                
-                                for (let healthBonus = 0; healthBonus <= 10; healthBonus++) {
-                                    for (let attackBonus = 0; attackBonus <= (10 - healthBonus); attackBonus++) {
-                                        for (let defenseBonus = 0; defenseBonus <= (10 - healthBonus - attackBonus); defenseBonus++) {
-                                            
-                                            const agilityBonus = 10 - healthBonus - attackBonus - defenseBonus;
+                const avgB = (minB + maxB) / 2; // 산술 평균 바(Bar) 계수
+                const lvl1Score = Number(document.getElementById('my-atk').value) + Number(document.getElementById('my-def').value) + Number(document.getElementById('my-agi').value) + (Number(document.getElementById('my-hp').value) / 3);
+                const lvlUpCount = 139;
 
-                                            // 순수 유전 계수 베이스 연산
-                                            const baseAttack = coefs.atkC + attackRandom + attackBonus;
-                                            const baseDefense = coefs.defC + defenseRandom + defenseBonus;
-                                            const baseAgility = coefs.agiC + agilityRandom + agilityBonus;
-                                            const baseHealth = coefs.hpC + healthRandom + healthBonus;
-
-                                            // 순수 계수 연산 (보정치 개입 없음)
-                                            const initialHealth = (baseHealth * coefs.initC) / 100;
-                                            const initialAttack = (baseAttack * coefs.initC) / 100;
-                                            const initialDefense = (baseDefense * coefs.initC) / 100;
-                                            const initialAgility = (baseAgility * coefs.initC) / 100;
-
-                                            const calcHealth = Math.floor(initialHealth * 4 + initialAttack + initialDefense + initialAgility);
-                                            const calcAttack = Math.floor(initialHealth * 0.1 + initialAttack + initialDefense * 0.1 + initialAgility * 0.05);
-                                            const calcDefense = Math.floor(initialHealth * 0.1 + initialAttack * 0.1 + initialDefense + initialAgility * 0.05);
-                                            const calcAgility = Math.floor(initialAgility);
-
+                for (let hR = -2; hR <= 2; hR++) {
+                    for (let aR = -2; aR <= 2; aR++) {
+                        for (let dR = -2; dR <= 2; dR++) {
+                            for (let gR = -2; gR <= 2; gR++) {
+                                for (let hB = 0; hB <= 10; hB++) {
+                                    for (let aB = 0; aB <= (10-hB); aB++) {
+                                        for (let dB = 0; dB <= (10-hB-aB); dB++) {
+                                            const gB = 10 - hB - aB - dB;
                                             totalPossibleCases++;
-
-                                            // 시뮬레이션된 '순수 계산값'을, 보정치가 제거된 내 펫의 '순수 스탯(netHp 등)'과 완벽하게 1:1 비교합니다.
-                                            if (calcHealth === netHp && calcAttack === netAtk && calcDefense === netDef && calcAgility === netAgi) {
+                                            if (Math.floor(((coefs.hpC+hR+hB)*coefs.initC/100)*4 + ((coefs.atkC+aR+aB)*coefs.initC/100) + ((coefs.defC+dR+dB)*coefs.initC/100) + ((coefs.agiC+gR+gB)*coefs.initC/100)) === netHp &&
+                                                Math.floor(((coefs.hpC+hR+hB)*coefs.initC/100)*0.1 + ((coefs.atkC+aR+aB)*coefs.initC/100) + ((coefs.defC+dR+dB)*coefs.initC/100)*0.1 + ((coefs.agiC+gR+gB)*coefs.initC/100)*0.05) === netAtk &&
+                                                Math.floor(((coefs.hpC+hR+hB)*coefs.initC/100)*0.1 + ((coefs.atkC+aR+aB)*coefs.initC/100)*0.1 + ((coefs.defC+dR+dB)*coefs.initC/100) + ((coefs.agiC+gR+gB)*coefs.initC/100)*0.05) === netDef &&
+                                                Math.floor((coefs.agiC+gR+gB)*coefs.initC/100) === netAgi) {
+                                                
                                                 exactMatchCount++;
                                                 
-                                                // 보정치 유무에 상관없이, 순수 랜덤 능력치가 최고 수치(2)로 떴을 때만 S급 성공으로 판정
-                                                const isAtkSuccess = (attackRandom === 2);
-                                                const isDefSuccess = (defenseRandom === 2);
-                                                const isAgiSuccess = (agilityRandom === 2);
-                                                const isHpSuccess  = (healthRandom === 2);
+                                                // 최저 성장선 계산
+                                                let sMin = lvl1Score + (lvlUpCount * (46*(coefs.hpC+hR+2.5)*minB/10000 + 43*((coefs.atkC+aR+2.5)*minB/10000 + (coefs.defC+dR+2.5)*minB/10000 + (coefs.agiC+gR+2.5)*minB/10000)) / 30);
+                                                // 최고 성장선 계산
+                                                let sMax = lvl1Score + (lvlUpCount * (46*(coefs.hpC+hR+2.5)*maxB/10000 + 43*((coefs.atkC+aR+2.5)*maxB/10000 + (coefs.defC+dR+2.5)*maxB/10000 + (coefs.agiC+gR+2.5)*maxB/10000)) / 30);
+                                                // 평균 기대선 계산 (유저 피드백 반영 핵심)
+                                                let sAvg = lvl1Score + (lvlUpCount * (46*(coefs.hpC+hR+2.5)*avgB/10000 + 43*((coefs.atkC+aR+2.5)*avgB/10000 + (coefs.defC+dR+2.5)*avgB/10000 + (coefs.agiC+gR+2.5)*avgB/10000)) / 30);
+                                                
+                                                if (sMin < absoluteMinScore) absoluteMinScore = sMin;
+                                                if (sMax > absoluteMaxScore) absoluteMaxScore = sMax;
+                                                totalAvgScoreSum += sAvg;
 
-                                                if (isAtkSuccess && isDefSuccess && isAgiSuccess && isHpSuccess) {
-                                                    hallucinationCases++;
-                                                }
+                                                if (aR===2 && dR===2 && gR===2 && hR===2) hallucinationCases++;
                                             }
                                         }
                                     }
                                 }
-                                
                             }
                         }
                     }
                 }
 
-                if (exactMatchCount === 0 && !isDbPet) {
-                    wrapper.innerHTML = `<div class="error-highlight">안잡히는 초기치일걸요~</div>`;
+                if (exactMatchCount === 0) {
+                    wrapper.innerHTML = `<div class="error-highlight" style="font-size: 19px; padding: 10px 0;">안잡히는 스탯 조합 (매칭 실패)</div>`;
+                    document.getElementById('status-msg').innerHTML = "<span style='color:#e74c3c;'>분석 실패</span>";
                 } else {
-                    if(exactMatchCount === 0) exactMatchCount = 1; 
-
-                    let finalProbability = (hallucinationCases / exactMatchCount) * 100;
-                    if (finalProbability > 100) finalProbability = 100;
+                    const dispProb = ((hallucinationCases / exactMatchCount) * 100).toFixed(2);
+                    const expectedAttempts = (hallucinationCases/exactMatchCount) > 0 ? (1 / (hallucinationCases/exactMatchCount)).toFixed(2) : "ㅠㅠ";
+                    const appearString = (Number(document.getElementById('b-atk').value)>0 || rebirthValue!=="none") ? "<strong>--%</strong>" : `<strong>${formatPercentage((exactMatchCount / totalPossibleCases) * 100)}</strong>`;
                     
-                    const displayProbability = finalProbability.toFixed(2);
-                    const probDec = finalProbability / 100;
-                    const expectedAttempts = probDec > 0 ? (1 / probDec).toFixed(2) : "ㅠㅠ";
-
-                    const hasBonus = (bAtk > 0 || bDef > 0 || bAgi > 0 || bHp > 0);
-                    const isRebirth = (rebirthValue === "1" || rebirthValue === "2");
-
-                    let appearString = "";
-                    if (hasBonus || isRebirth) {
-                        appearString = "<strong>--%</strong>"; 
-                    } else {
-                        const percentage = totalPossibleCases > 0 ? ((exactMatchCount / totalPossibleCases) * 100) : 0.0;
-                        appearString = `<strong>${formatPercentage(percentage)}</strong>`;
-                    }
+                    // 평균 기대치 렌더링 세팅
+                    const calculatedAvg = Math.floor(totalAvgScoreSum / exactMatchCount);
+                    const scoreRangeString = `<strong style="color: #27ae60; font-size: 22px;">약 ${calculatedAvg}점</strong> <span style="font-size:14px; color:#7f8c8d; font-weight:normal;">(이론상 최저 ${Math.floor(absoluteMinScore)} ~ 최대 ${Math.floor(absoluteMaxScore)})</span>`;
 
                     wrapper.innerHTML = `
-                        <div style="font-size: 20px; margin-bottom: 12px; color: #2c3e50;" id="final-success-prob">
-                            성공 확률 : <strong style="color: #2980b9;">${displayProbability}%</strong>
-                        </div>
-                        <div style="font-size: 20px; margin-bottom: 12px; color: #2c3e50;" id="final-expect-try">
-                            성공 기대값 : <strong style="color: #e74c3c;">${expectedAttempts === 'ㅠㅠ' ? 'ㅠㅠ' : expectedAttempts + '번'}</strong>
-                        </div>
-                        <div style="font-size: 18px; color: #7f8c8d;" id="final-appear-prob">
-                            출현 확률 : ${appearString}
+                        <div style="font-size: 20px; margin-bottom: 12px; color: #2c3e50;">성공 확률 : <strong style="color: #2980b9;">${dispProb}%</strong></div>
+                        <div style="font-size: 20px; margin-bottom: 12px; color: #2c3e50;">성공 기대값 : <strong style="color: #e74c3c;">${expectedAttempts==='ㅠㅠ'?'ㅠㅠ':expectedAttempts+'번'}</strong></div>
+                        <div style="font-size: 18px; color: #7f8c8d; margin-bottom: 12px;">출현 확률 : ${appearString}</div>
+                        <div style="font-size: 19px; color: #2c3e50; padding-top: 12px; border-top: 1px dashed #cbd5e0; line-height:1.6;">
+                            140만렙 <span style="font-weight:bold; color:#27ae60;">평균 기대</span> 점수 : ${scoreRangeString}
                         </div>
                     `;
+                    document.getElementById('status-msg').innerHTML = "<span style='color:#27ae60;'>성공!</span>";
                 }
             }
-
-            document.getElementById('status-msg').innerHTML = statusMsg;
             document.getElementById('loading').style.display = 'none';
             document.getElementById('result-box').style.display = 'block';
-        }, 50); 
+        }, 50);
     });
 </script>
-
 <script src="https://docs.google.com/spreadsheets/d/16AarhfhhOayiRYP3xOW6VIUVkIf3bcltyEEpgw9lwn4/gviz/tq?tqx=out:json"></script>
 </body>
 </html>
