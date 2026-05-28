@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>페트 랭크 계산기</title>
+    <title>샴기르 서버 페트성장 확률 계산기</title>
     <style>
         @font-face {
             font-family: '박다현체';
@@ -17,1281 +17,933 @@
             margin: 0;
             padding: 0;
             background-color: #f9fafb;
+            color: #333;
         }
 
         .container {
-            max-width: 600px;
-            margin: 50px auto;
+            max-width: 850px;
+            margin: 40px auto;
             background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .container:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
 
         h1 {
             text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+            color: #2c3e50;
+            margin-bottom: 5px;
         }
-
-        .intro {
-            margin-bottom: 20px;
-            font-size: 16px;
-            color: #555;
-            background-color: #eaf2ff;
+        
+        .instructions-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #2980b9;
             padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #b3d0f2;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 6px;
+            margin-bottom: 30px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #4f5d73;
         }
 
-        .intro strong {
-            font-size: 18px;
-            color: #333;
+        .instructions-box p {
+            margin: 0 0 10px 0;
+        }
+        .instructions-box p:last-child {
+            margin-bottom: 0;
         }
 
         label {
             display: block;
-            margin-top: 15px;
             font-weight: bold;
-            color: #333;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-size: 14px;
         }
 
-        input, ul {
-            width: 97%;
+        input, select {
+            width: 100%;
             padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            background-color: #f9f9f9;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-family: '박다현체', sans-serif;
+            font-size: 15px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            background-color: #fcfcfc;
+            transition: 0.2s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            background-color: #fff;
         }
 
-        ul {
-            list-style: none;
-            padding: 0;
+        input:read-only {
+            background-color: #e9ecef !important;
+            color: #495057;
+            border-color: #ced4da;
+            cursor: not-allowed;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+        #suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
             background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
             max-height: 150px;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+            display: none;
         }
-
-        li {
+        #suggestions li {
             padding: 10px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: background 0.2s;
         }
-
-        li:hover {
+        #suggestions li:hover {
             background-color: #f0f8ff;
         }
 
-        button {
-            display: block;
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #eceff1;
+        }
+
+        .grid-4col {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: #2980b9;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+        }
+
+        .calc-btn {
             width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            background-color: #007bff;
+            padding: 16px;
+            background-color: #2980b9;
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
+            font-family: '박다현체', sans-serif;
             font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
         }
 
-        button:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
+        .calc-btn:hover { 
+            background-color: #2471a3; 
         }
 
-        .result {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            color: #333;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .notice {
+        .result-box {
             margin-top: 30px;
-            padding: 20px;
-            background: #fffbe7;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            color: #d9534f;
-            line-height: 1.6;
-            text-align: justify;
+            padding: 25px;
+            background-color: #e8f4f8;
+            border: 1px solid #b3d4e5;
+            border-radius: 8px;
         }
 
-        #loading {
-            display: none;
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #b3d4e5;
+            align-items: center;
+        }
+
+        .result-row:last-child { 
+            border-bottom: none; 
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .loading {
             text-align: center;
-            font-size: 18px;
-            color: #007bff;
-            margin-top: 20px;
+            font-size: 16px;
+            color: #e67e22;
+            font-weight: bold;
+            display: none;
+            margin-top: 15px;
         }
-        :root {
-    --main-color: #007bff;
-    --hover-color: #0056b3;
-    --font-family: '박다현체', sans-serif;
-}
 
-body {
-    font-family: var(--font-family), sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f9fafb;
-}
-
-.container {
-    max-width: 700px;
-    margin: 50px auto;
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    animation: fadeIn 1s ease-in-out;
-}
-
-.container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-input:focus {
-    outline: none;
-    border-color: var(--main-color);
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
-    background-color: #f0f8ff;
-    transform: scale(1.02);
-}
-
-button:hover {
-    background-color: var(--hover-color);
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(0, 91, 255, 0.4);
-}
-
-#loading {
-    display: none;
-    text-align: center;
-    font-size: 18px;
-    color: var(--main-color);
-    margin-top: 20px;
-    position: relative;
-    padding: 20px;
-}
-
-.spinner {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto;
-    border: 4px solid transparent;
-    border-top: 4px solid var(--main-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
+        .error-highlight {
+            font-size: 24px;
+            color: #e74c3c;
+            font-weight: bold;
+            padding: 20px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>페트 랭크 계산기</h1>
 
-         <!-- 소개글 영역 -->
-         <div class="intro">
-            <strong>업데이트 : 2026/5/14</strong><br>
-            <br>
-            안녕하세요 !<br> 이 페이지는 '샴기르' 서버 페트의 랭크 계산기입니다.<br>
-            페트의 <span style="color: red;">[ 모든 스탯이 A+이상 ]</span> 으로 성장할 확률을 계산해 줍니다.<br>
-            <span style="color: red;">홈페이지 정보를 통해 추정하는 것이기에 오차가 발생할 수 있으므로<br>
-            반드시 단순 참고용이나 재미로만 봐주시기를 부탁드리겠습니다 !!</span><br>
-            사용된 페트의 소숫점은 아래 링크를 통해 확인 하실 수 있습니다.<br>
-            <a href="https://docs.google.com/spreadsheets/d/16bemZRnq9qzY--NLUBhok1jUoAcuk97R31SneGO5yqI/edit?usp=sharing">https://docs.google.com/spreadsheets</a><br> 
-            계산기 관련 문의는  <span style="color: rgb(69, 86, 241);">[서포터]유미</span>로 DM부탁드려요~!!<br>
-            그럼 모두모두가 좋은 하루 되시길 ^p^ !!<br>
-            업데이트된 페트 확인중. <span style="color: rgb(69, 86, 241);">[아즈라엘]구름비</span>
+<div class="container">
+    <h1>샴기르 서버 페트성장 확률 계산기</h1>
+    
+    <div class="instructions-box">
+        <p style="color: #7f8c8d; font-size: 13px; text-align: right; margin-bottom: 5px;">업데이트 : 2026/5/28</p>
+        <p>안녕하세요 !</p>
+        <p>이 페이지는 '샴기르' 서버 페트의 랭크 계산기입니다.<br>
+        페트의 [ 모든 스탯이 A+이상 ] 으로 성장할 확률을 계산해 줍니다.<br>
+        <span style="font-size: 14px; color: #555555;">(1환의 경우 S이상, 2환의 경우 S+ 이상)</span></p>
+        <p>홈페이지 정보를 통해 추정하는 것이기에 오차가 발생할 수 있으므로<br>
+        반드시 단순 참고용이나 재미로만 봐주시기를 부탁드리겠습니다 !!</p>
+        <p>검색되지 않는 페트의 경우 이름을 정확히 입력후 노환페트의 초기치와 성장율을 게임내 엘범에서 검색해 입력시 2환페트까지 성장확률을 계산하도록 해 두었습니다.<br>
+        새페트의 경우 계수를 찾아내지 못해 계산이 불가할수 있습니다.</p>
+        <p style="color: #2980b9; font-weight: bold;">⚠️ 디비에 없는 페트를 최초로 계산했을경우 디비에 자동저장되므로 페트이름은 정확하게 입력 부탁드립니다.</p>
+        <p>사용된 페트의 데이터는 아래 링크를 통해 확인 하실 수 있습니다.<br>
+        <a href="https://docs.google.com/spreadsheets/d/1AZfmEjPn5f033SAC_sS-OnPWa3cfoAuPfVoQEGEusxU/edit?usp=sharing" target="_blank" style="color: #2980b9; font-weight: bold; text-decoration: underline;">페트 데이터 확인하기 (구글 스프레드시트)</a></p>
+        <p>계산기 관련 문의는 구름비로 DM이나 정보란 계산기쪽에 문의 바랍니다.</p>
+    </div>
+
+    <div class="grid-2col" style="background-color: #eceff1; border-color: #b0bec5; margin-bottom: 25px;">
+        <div class="search-wrapper">
+            <label>페트 이름</label>
+            <input type="text" id="pet-name" placeholder="구글 시트에서 DB 로드 중..." value="" autocomplete="off" disabled>
+            <ul id="suggestions"></ul>
         </div>
+        <div>
+            <label>환생 상태</label>
+            <select id="rebirth-type">
+                <option value="none">노환 페트</option>
+                <option value="1">1환 페트</option>
+                <option value="2">2환 페트</option>
+            </select>
+        </div>
+    </div>
 
-        <label for="pet-name">페트 이름</label>
-        <input type="text" id="pet-name" placeholder="이름을 입력해주세요 !" autocomplete="off">
-        <ul id="suggestions"></ul>
+    <div class="grid-2col" style="background-color: #fff3e0; border-color: #ffe0b2; margin-bottom: 15px;">
+        <div>
+            <div class="section-title" style="color: #e65100;">1-A. 노환 베이스 S급 1렙 초기치</div>
+            <div class="grid-4col">
+                <div><label>공격</label><input type="number" id="base-atk" value=""></div>
+                <div><label>방어</label><input type="number" id="base-def" value=""></div>
+                <div><label>순발</label><input type="number" id="base-agi" value=""></div>
+                <div><label>체력</label><input type="number" id="base-hp" value=""></div>
+            </div>
+        </div>
+        <div>
+            <div class="section-title" style="color: #e65100;">1-B. 노환 베이스 S급 성장률</div>
+            <div class="grid-4col">
+                <div><label>공성장</label><input type="number" step="0.001" id="base-g-atk" value=""></div>
+                <div><label>방성장</label><input type="number" step="0.001" id="base-g-def" value=""></div>
+                <div><label>순성장</label><input type="number" step="0.001" id="base-g-agi" value=""></div>
+                <div><label>피성장</label><input type="number" step="0.001" id="base-g-hp" value=""></div>
+            </div>
+        </div>
+    </div>
 
-        <label for="display-health">체력</label>
-        <input type="number" id="display-health" placeholder="  " />
+    <div id="rebirth-info-section" class="grid-2col" style="background-color: #e1f5fe; border-color: #b3e5fc; display: none; margin-bottom: 25px;">
+        <div>
+            <div class="section-title" style="color: #0288d1;"><span class="rebirth-text-display">1환</span> S급 1렙 초기치</div>
+            <div class="grid-4col">
+                <div><label>공격</label><input type="number" id="r-base-atk" readonly></div>
+                <div><label>방어</label><input type="number" id="r-base-def" readonly></div>
+                <div><label>순발</label><input type="number" id="r-base-agi" readonly></div>
+                <div><label>체력</label><input type="number" id="r-base-hp" readonly></div>
+            </div>
+        </div>
+        <div>
+            <div class="section-title" style="color: #0288d1;"><span class="rebirth-text-display">1환</span> S급 성장률</div>
+            <div class="grid-4col">
+                <div><label>공성장</label><input type="number" step="0.001" id="r-base-g-atk" readonly></div>
+                <div><label>방성장</label><input type="number" step="0.001" id="r-base-g-def" readonly></div>
+                <div><label>순성장</label><input type="number" step="0.001" id="r-base-g-agi" readonly></div>
+                <div><label>피성장</label><input type="number" step="0.001" id="r-base-g-hp" readonly></div>
+            </div>
+        </div>
+    </div>
 
-        <label for="display-attack">공격력</label>
-        <input type="number" id="display-attack" placeholder="  " />
+    <div class="grid-2col" style="background-color: #e8f5e9; border-color: #c8e6c9;">
+        <div>
+            <div class="section-title" style="color: #2e7d32;">2-A. 내 펫의 1렙 표기 스탯 입력</div>
+            <div class="grid-4col">
+                <div><label>공격</label><input type="number" id="my-atk" value=""></div>
+                <div><label>방어</label><input type="number" id="my-def" value=""></div>
+                <div><label>순발</label><input type="number" id="my-agi" value=""></div>
+                <div><label>체력</label><input type="number" id="my-hp" value=""></div>
+            </div>
+        </div>
+        <div>
+            <div class="section-title" style="color: #2e7d32;">2-B. 환생 내부 보정치</div>
+            <div class="grid-4col">
+                <div><label>공보정</label><input type="number" id="b-atk" value="0"></div>
+                <div><label>방보정</label><input type="number" id="b-def" value="0"></div>
+                <div><label>순보정</label><input type="number" id="b-agi" value="0"></div>
+                <div><label>피보정</label><input type="number" id="b-hp" value="0"></div>
+            </div>
+        </div>
+    </div>
 
-        <label for="display-defense">방어력</label>
-        <input type="number" id="display-defense" placeholder="  " />
+    <button id="btn-calc" class="calc-btn">계산하기</button>
+    <div id="loading" class="loading">독립 시행 수학적 검증 연산 중... 잠시만 기다려주세요.</div>
 
-        <label for="display-agility">순발력</label>
-        <input type="number" id="display-agility" placeholder="  " />
+    <div id="result-box" class="result-box" style="display: none;">
+        <div class="section-title" style="color: #2c3e50;"><span id="r-pet-display"></span> 분석 결과</div>
 
-        <button id="calculate-btn">계산하기</button>
-
-        <div id="result" class="result"></div>
-        <div id="loading">계산 중입니다... 잠시만 기다려주세요.</div>
-
-        <div class="notice">
-            <strong>주의사항</strong><br>
-            - 반드시 참고용으로만 사용해 주세요.<br>
-            - 성공률이 높아도 더 잘크지는 않습니다!<br>
-            - 선택 시 나오는 숫자는 '정석스탯' 입니다.<br>
-            - 성공임에도 A이하로 표기되는 상황이 있을 수 있습니다.<br>
-            - 더 낮은 스탯임에도 성공률이 높다면 다른 스탯의 소숫점 경우의수가 더 많기 때문입니다! <br>
+        <div class="result-row" style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #dcdde1; flex-direction: column; align-items: stretch;">
+            <div style="text-align: center; background: #f8f9fa; padding: 20px; border-radius: 6px;" id="probability-wrapper">
+            </div>
+        </div>
+        
+        <div id="status-msg" style="text-align:center; font-size:14px; font-weight:bold; margin-top:15px;"></div>
+    </div>
 </div>
 
-<div style="text-align: center; margin-top: 30px; padding-bottom: 20px;">
-  <a href="https://hits.sh/lunya0519.github.io/html/">
-    <img alt="Hits" src="https://hits.sh/lunya0519.github.io/html.svg?view=today-total&style=flat-square&label=Hello&color=ffd3d3&labelColor=ffffff"/>
-  </a>
-</div>
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwKbFkQC2iAc3EM8SR-93F7ZF57mHm3YL1veB2aNOdP5U5nCQC0PE_EVGREMH_9Hyzl/exec";
 
-    <script>
-        // ---------------------------
-        // (1) 초성 변환 함수 추가
-        // ---------------------------
-        // '가'(U+AC00)부터 '힣'(U+D7A3) 사이의 한글 음절을 분해하여
-        // 초성(ㄱ, ㄲ, ㄴ, ㄷ, ㄸ, ... )만 추출합니다.
-        function getChosung(str) {
-            const BASE_CODE = 0xAC00; // '가'
-            const LAST_CODE = 0xD7A3; // '힣'
-            const CHOSUNG_LIST = [
-                "ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ",
-                "ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ",
-                "ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"
-            ];
-
-            let result = "";
-            for (let i = 0; i < str.length; i++) {
-                const code = str.charCodeAt(i);
-
-                // 한글 음절 범위 내인지 확인
-                if (code >= BASE_CODE && code <= LAST_CODE) {
-                    // 초성 = ((해당 문자 - '가') / 588)의 몫
-                    const offset = code - BASE_CODE;
-                    const chosungIndex = Math.floor(offset / 588);
-                    result += CHOSUNG_LIST[chosungIndex];
-                } else {
-                    // 한글이 아닐 경우 그냥 입력
-                    // (원한다면 제외하거나 변환 로직을 달리 할 수 있음)
-                    result += str[i];
-                }
-            }
-            return result;
+    function getChosung(str) {
+        const BASE_CODE = 0xAC00; 
+        const LAST_CODE = 0xD7A3; 
+        const CHOSUNG_LIST = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+        let result = "";
+        for (let i = 0; i < str.length; i++) {
+            const code = str.charCodeAt(i);
+            if (code >= BASE_CODE && code <= LAST_CODE) {
+                const offset = code - BASE_CODE;
+                const chosungIndex = Math.floor(offset / 588);
+                result += CHOSUNG_LIST[chosungIndex];
+            } else { result += str[i]; }
         }
-
-        // ---------------------------
-        // (2) 사전 정의된 페트 데이터
-        // ---------------------------
-        const petData = {
-            "투투": {initialCoefficient: 17, healthCoefficient: 25, attackCoefficient: 24, defenseCoefficient: 9, agilityCoefficient: 34},
-            "우푸": {initialCoefficient: 16, healthCoefficient: 18, attackCoefficient: 24, defenseCoefficient: 9, agilityCoefficient: 36},
-            "푸푸": {initialCoefficient: 16, healthCoefficient: 20, attackCoefficient: 24, defenseCoefficient: 11, agilityCoefficient: 37},
-            "꼬꼬비": {initialCoefficient: 16, healthCoefficient: 22, attackCoefficient: 27, defenseCoefficient: 12, agilityCoefficient: 32},
-            "꼬비오": {initialCoefficient: 18, healthCoefficient: 22, attackCoefficient: 26, defenseCoefficient: 13, agilityCoefficient: 32},
-            "꼬비": {initialCoefficient: 20, healthCoefficient: 21, attackCoefficient: 23, defenseCoefficient: 15, agilityCoefficient: 30},
-            "꼬미": {initialCoefficient: 22, healthCoefficient: 22, attackCoefficient: 25, defenseCoefficient: 12, agilityCoefficient: 30},
-            "얼룩부이비": {initialCoefficient: 23, healthCoefficient: 42, attackCoefficient: 32, defenseCoefficient: 22, agilityCoefficient: 12},
-            "부이비": {initialCoefficient: 16, healthCoefficient: 44, attackCoefficient: 36, defenseCoefficient: 16, agilityCoefficient: 12},
-            "부이": {initialCoefficient: 22, healthCoefficient: 48, attackCoefficient: 31, defenseCoefficient: 18, agilityCoefficient: 12},
-            "골드부비": {initialCoefficient: 25, healthCoefficient: 42, attackCoefficient: 35, defenseCoefficient: 16, agilityCoefficient: 14},
-            "부비": {initialCoefficient: 15, healthCoefficient: 45, attackCoefficient: 30, defenseCoefficient: 20, agilityCoefficient: 12},
-            "불그리": {initialCoefficient: 10, healthCoefficient: 24, attackCoefficient: 31, defenseCoefficient: 12, agilityCoefficient: 31},
-            "얼룩우리": {initialCoefficient: 15, healthCoefficient: 22, attackCoefficient: 19, defenseCoefficient: 21, agilityCoefficient: 25},
-            "두리": {initialCoefficient: 20, healthCoefficient: 22, attackCoefficient: 28, defenseCoefficient: 11, agilityCoefficient: 26},
-            "우리": {initialCoefficient: 10, healthCoefficient: 20, attackCoefficient: 14, defenseCoefficient: 19, agilityCoefficient: 25},
-            "오투투": {initialCoefficient: 20, healthCoefficient: 20, attackCoefficient: 23, defenseCoefficient: 13, agilityCoefficient: 33},
-            "쿠쿠르": {initialCoefficient: 20, healthCoefficient: 24, attackCoefficient: 28, defenseCoefficient: 12, agilityCoefficient: 33},
-            "케이비": {initialCoefficient: 20, healthCoefficient: 21, attackCoefficient: 24, defenseCoefficient: 12, agilityCoefficient: 37},
-            "프로돈": {initialCoefficient: 25, healthCoefficient: 30, attackCoefficient: 37, defenseCoefficient: 16, agilityCoefficient: 22},
-            "환생얼룩우리": {initialCoefficient: 25, healthCoefficient: 29, attackCoefficient: 27, defenseCoefficient: 31, agilityCoefficient: 20},
-            "타이혼": {initialCoefficient: 30, healthCoefficient: 21, attackCoefficient: 30, defenseCoefficient: 18, agilityCoefficient: 29},
-            "프리토스": {initialCoefficient: 29, healthCoefficient: 37, attackCoefficient: 32, defenseCoefficient: 29, agilityCoefficient: 11},
-            "부르보": {initialCoefficient: 20, healthCoefficient: 23, attackCoefficient: 29, defenseCoefficient: 27, agilityCoefficient: 14},
-            "부르돈": {initialCoefficient: 25, healthCoefficient: 25, attackCoefficient: 35, defenseCoefficient: 14, agilityCoefficient: 24},
-            "카르기안": {initialCoefficient: 20, healthCoefficient: 20, attackCoefficient: 20, defenseCoefficient: 36, agilityCoefficient: 12},
-            "쿠타스": {initialCoefficient: 22, healthCoefficient: 34, attackCoefficient: 28, defenseCoefficient: 39, agilityCoefficient: 6},
-            "아이카스": {initialCoefficient: 22, healthCoefficient: 33, attackCoefficient: 24, defenseCoefficient: 43, agilityCoefficient: 6},
-            "램가스": {initialCoefficient: 20, healthCoefficient: 25, attackCoefficient: 28, defenseCoefficient: 45, agilityCoefficient: 10},
-            "보크곤": {initialCoefficient: 19, healthCoefficient: 27, attackCoefficient: 34, defenseCoefficient: 18, agilityCoefficient: 26},
-            "실버우리": {initialCoefficient: 20, healthCoefficient: 26, attackCoefficient: 29, defenseCoefficient: 23, agilityCoefficient: 27},
-            "비트로스": {initialCoefficient: 25, healthCoefficient: 31, attackCoefficient: 33, defenseCoefficient: 28, agilityCoefficient: 14},
-            "노스토로스": {initialCoefficient: 24, healthCoefficient: 23, attackCoefficient: 32, defenseCoefficient: 15, agilityCoefficient: 29},
-            "코리토르스": {initialCoefficient: 19, healthCoefficient: 32, attackCoefficient: 24, defenseCoefficient: 32, agilityCoefficient: 20},
-            "란베르스": {initialCoefficient: 21, healthCoefficient: 34, attackCoefficient: 30, defenseCoefficient: 26, agilityCoefficient: 20},
-            "타르노로스": {initialCoefficient: 23, healthCoefficient: 43, attackCoefficient: 24, defenseCoefficient: 23, agilityCoefficient: 21},
-            "다이노로스": {initialCoefficient: 24, healthCoefficient: 42, attackCoefficient: 25, defenseCoefficient: 22, agilityCoefficient: 2},
-            "아리노스": {initialCoefficient: 26, healthCoefficient: 42, attackCoefficient: 21, defenseCoefficient: 29, agilityCoefficient: 19},
-            "아토라지": {initialCoefficient: 20, healthCoefficient: 47, attackCoefficient: 22, defenseCoefficient: 24, agilityCoefficient: 21},
-            "스토라지": {initialCoefficient: 21, healthCoefficient: 44, attackCoefficient: 22, defenseCoefficient: 26, agilityCoefficient: 20},
-            "라이혼": {initialCoefficient: 30, healthCoefficient: 26, attackCoefficient: 30, defenseCoefficient: 19, agilityCoefficient: 30},
-            "라나프": {initialCoefficient: 28, healthCoefficient: 19, attackCoefficient: 28, defenseCoefficient: 15, agilityCoefficient: 30},
-            "모나시프": {initialCoefficient: 25, healthCoefficient: 23, attackCoefficient: 28, defenseCoefficient: 17, agilityCoefficient: 30},
-            "프이토": {initialCoefficient: 26, healthCoefficient: 20, attackCoefficient: 26, defenseCoefficient: 18, agilityCoefficient: 28},
-            "골로스": {initialCoefficient: 28, healthCoefficient: 23, attackCoefficient: 36, defenseCoefficient: 25, agilityCoefficient: 21},
-            "모가로스": {initialCoefficient: 27, healthCoefficient: 23, attackCoefficient: 37, defenseCoefficient: 20, agilityCoefficient: 25},
-            "오르곤": {initialCoefficient: 26, healthCoefficient: 27, attackCoefficient: 35, defenseCoefficient: 21, agilityCoefficient: 22},
-            "오가로스": {initialCoefficient: 25, healthCoefficient: 26, attackCoefficient: 32, defenseCoefficient: 26, agilityCoefficient: 20},
-            "호르쿠": {initialCoefficient: 18, healthCoefficient: 20, attackCoefficient: 23, defenseCoefficient: 12, agilityCoefficient: 34},
-            "쿠쿠": {initialCoefficient: 20, healthCoefficient: 19, attackCoefficient: 23, defenseCoefficient: 11, agilityCoefficient: 35},
-            "도라비스": {initialCoefficient: 23, healthCoefficient: 24, attackCoefficient: 31, defenseCoefficient: 20, agilityCoefficient: 30},
-            "포이비스": {initialCoefficient: 24, healthCoefficient: 24, attackCoefficient: 35, defenseCoefficient: 17, agilityCoefficient: 26},
-            "카르곤": {initialCoefficient: 26, healthCoefficient: 22, attackCoefficient: 37, defenseCoefficient: 16, agilityCoefficient: 28},
-            "테라곤": {initialCoefficient: 27, healthCoefficient: 23, attackCoefficient: 33, defenseCoefficient: 16, agilityCoefficient: 30},
-            "만모로스": {initialCoefficient: 25, healthCoefficient: 51, attackCoefficient: 27, defenseCoefficient: 22, agilityCoefficient: 11},
-            "마모나스": {initialCoefficient: 26, healthCoefficient: 51, attackCoefficient: 25, defenseCoefficient: 24, agilityCoefficient: 10},
-            "만모르": {initialCoefficient: 24, healthCoefficient: 48, attackCoefficient: 29, defenseCoefficient: 22, agilityCoefficient: 10},
-            "만모": {initialCoefficient: 27, healthCoefficient: 50, attackCoefficient: 26, defenseCoefficient: 25, agilityCoefficient: 8},
-            "스텐토스": {initialCoefficient: 28, healthCoefficient: 39, attackCoefficient: 29, defenseCoefficient: 35, agilityCoefficient: 5},
-            "프라키토스": {initialCoefficient: 24, healthCoefficient: 36, attackCoefficient: 37, defenseCoefficient: 28, agilityCoefficient: 6},
-            "다이노스": {initialCoefficient: 26, healthCoefficient: 41, attackCoefficient: 28, defenseCoefficient: 32, agilityCoefficient: 7},
-            "다이노": {initialCoefficient: 25, healthCoefficient: 38, attackCoefficient: 29, defenseCoefficient: 35, agilityCoefficient: 6},
-            "투이": {initialCoefficient: 24, healthCoefficient: 46, attackCoefficient: 31, defenseCoefficient: 21, agilityCoefficient: 10},
-            "씨보스": {initialCoefficient: 21, healthCoefficient: 49, attackCoefficient: 26, defenseCoefficient: 25, agilityCoefficient: 9},
-            "루이": {initialCoefficient: 22, healthCoefficient: 50, attackCoefficient: 28, defenseCoefficient: 22, agilityCoefficient: 10},
-            "가가로스": {initialCoefficient: 26, healthCoefficient: 34, attackCoefficient: 34, defenseCoefficient: 30, agilityCoefficient: 12},
-            "메가로스": {initialCoefficient: 24, healthCoefficient: 35, attackCoefficient: 30, defenseCoefficient: 31, agilityCoefficient: 12},
-            "기가로스": {initialCoefficient: 28, healthCoefficient: 31, attackCoefficient: 31, defenseCoefficient: 31, agilityCoefficient: 15},
-            "판지": {initialCoefficient: 16, healthCoefficient: 35, attackCoefficient: 37, defenseCoefficient: 19, agilityCoefficient: 17},
-            "쟈그": {initialCoefficient: 23, healthCoefficient: 36, attackCoefficient: 37, defenseCoefficient: 17, agilityCoefficient: 17},
-            "쟈그라": {initialCoefficient: 22, healthCoefficient: 32, attackCoefficient: 38, defenseCoefficient: 18, agilityCoefficient: 17},
-            "고반케스": {initialCoefficient: 18, healthCoefficient: 34, attackCoefficient: 37, defenseCoefficient: 19, agilityCoefficient: 17},
-            "토리노프스": {initialCoefficient: 12, healthCoefficient: 31, attackCoefficient: 31, defenseCoefficient: 35, agilityCoefficient: 12},
-            "노르노르": {initialCoefficient: 25, healthCoefficient: 23, attackCoefficient: 31, defenseCoefficient: 16, agilityCoefficient: 29},
-            "고르고르": {initialCoefficient: 21, healthCoefficient: 20, attackCoefficient: 30, defenseCoefficient: 13, agilityCoefficient: 28},
-            "베루루": {initialCoefficient: 23, healthCoefficient: 21, attackCoefficient: 30, defenseCoefficient: 13, agilityCoefficient: 28},
-            "베르가": {initialCoefficient: 24, healthCoefficient: 23, attackCoefficient: 29, defenseCoefficient: 14, agilityCoefficient: 27},
-            "카우": {initialCoefficient: 17, healthCoefficient: 22, attackCoefficient: 27, defenseCoefficient: 25, agilityCoefficient: 30},
-            "바우": {initialCoefficient: 17, healthCoefficient: 23, attackCoefficient: 27, defenseCoefficient: 23, agilityCoefficient: 32},
-            "바카": {initialCoefficient: 20, healthCoefficient: 22, attackCoefficient: 32, defenseCoefficient: 22, agilityCoefficient: 30},
-            "카쿠": {initialCoefficient: 18, healthCoefficient: 28, attackCoefficient: 24, defenseCoefficient: 26, agilityCoefficient: 29},
-            "무이": {initialCoefficient: 20, healthCoefficient: 52, attackCoefficient: 26, defenseCoefficient: 21, agilityCoefficient: 10},
-            "카키": {initialCoefficient: 20, healthCoefficient: 17, attackCoefficient: 23, defenseCoefficient: 11, agilityCoefficient: 33},
-            "타키": {initialCoefficient: 17, healthCoefficient: 19, attackCoefficient: 24, defenseCoefficient: 10, agilityCoefficient: 35},
-            "토르프스": {initialCoefficient: 14, healthCoefficient: 32, attackCoefficient: 28, defenseCoefficient: 41, agilityCoefficient: 9},
-            "바로로크스": {initialCoefficient: 22, healthCoefficient: 32, attackCoefficient: 27, defenseCoefficient: 30, agilityCoefficient: 18},
-            "펜타스": {initialCoefficient: 16, healthCoefficient: 35, attackCoefficient: 28, defenseCoefficient: 36, agilityCoefficient: 11},
-            "토리케라": {initialCoefficient: 16, healthCoefficient: 33, attackCoefficient: 28, defenseCoefficient: 38, agilityCoefficient: 10},
-            "토로쟈": {initialCoefficient: 21, healthCoefficient: 25, attackCoefficient: 31, defenseCoefficient: 28, agilityCoefficient: 13},
-            "쿠보": {initialCoefficient: 25, healthCoefficient: 26, attackCoefficient: 31, defenseCoefficient: 28, agilityCoefficient: 13},
-            "포보": {initialCoefficient: 19, healthCoefficient: 29, attackCoefficient: 30, defenseCoefficient: 30, agilityCoefficient: 13},
-            "휴보": {initialCoefficient: 18, healthCoefficient: 26, attackCoefficient: 29, defenseCoefficient: 30, agilityCoefficient: 13},
-            "고르고": {initialCoefficient: 27, healthCoefficient: 25, attackCoefficient: 35, defenseCoefficient: 19, agilityCoefficient: 19},
-            "투르돈": {initialCoefficient: 27, healthCoefficient: 30, attackCoefficient: 34, defenseCoefficient: 21, agilityCoefficient: 20},
-            "기라돈": {initialCoefficient: 23, healthCoefficient: 29, attackCoefficient: 30, defenseCoefficient: 26, agilityCoefficient: 19},
-            "고르돈": {initialCoefficient: 28, healthCoefficient: 28, attackCoefficient: 29, defenseCoefficient: 28, agilityCoefficient: 19},
-            "골드카비트": {initialCoefficient: 19, healthCoefficient: 19, attackCoefficient: 24, defenseCoefficient: 11, agilityCoefficient: 38},
-            "큐이": {initialCoefficient: 15, healthCoefficient: 16, attackCoefficient: 24, defenseCoefficient: 10, agilityCoefficient: 33},
-            "카비트": {initialCoefficient: 18, healthCoefficient: 22, attackCoefficient: 25, defenseCoefficient: 11, agilityCoefficient: 36},
-            "리스키": {initialCoefficient: 17, healthCoefficient: 27, attackCoefficient: 25, defenseCoefficient: 13, agilityCoefficient: 33},
-            "포링": {initialCoefficient: 18, healthCoefficient: 22, attackCoefficient: 28, defenseCoefficient: 11, agilityCoefficient: 32},
-            "쿠링": {initialCoefficient: 19, healthCoefficient: 20, attackCoefficient: 22, defenseCoefficient: 13, agilityCoefficient: 29},
-            "반기노": {initialCoefficient: 26, healthCoefficient: 24, attackCoefficient: 38, defenseCoefficient: 16, agilityCoefficient: 20},
-            "반보로": {initialCoefficient: 27, healthCoefficient: 25, attackCoefficient: 37, defenseCoefficient: 15, agilityCoefficient: 21},
-            "얀기로": {initialCoefficient: 29, healthCoefficient: 27, attackCoefficient: 36, defenseCoefficient: 16, agilityCoefficient: 20},
-            "리비노": {initialCoefficient: 23, healthCoefficient: 27, attackCoefficient: 37, defenseCoefficient: 19, agilityCoefficient: 17},
-            "로기안": {initialCoefficient: 23, healthCoefficient: 28, attackCoefficient: 25, defenseCoefficient: 43, agilityCoefficient: 8},
-            "코로카스": {initialCoefficient: 17, healthCoefficient: 29, attackCoefficient: 30, defenseCoefficient: 38, agilityCoefficient: 7},
-            "쿠카스": {initialCoefficient: 22, healthCoefficient: 28, attackCoefficient: 22, defenseCoefficient: 39, agilityCoefficient: 5},
-            "카타르카스": {initialCoefficient: 22, healthCoefficient: 25, attackCoefficient: 23, defenseCoefficient: 40, agilityCoefficient: 6},
-            "루니": {initialCoefficient: 22, healthCoefficient: 24, attackCoefficient: 27, defenseCoefficient: 20, agilityCoefficient: 28},
-            "토루루": {initialCoefficient: 19, healthCoefficient: 25, attackCoefficient: 30, defenseCoefficient: 18, agilityCoefficient: 30},
-            "후바바": {initialCoefficient: 24, healthCoefficient: 22, attackCoefficient: 28, defenseCoefficient: 14, agilityCoefficient: 29},
-            "라고고": {initialCoefficient: 23, healthCoefficient: 22, attackCoefficient: 29, defenseCoefficient: 15, agilityCoefficient: 28},
-            "다고스": {initialCoefficient: 19, healthCoefficient: 32, attackCoefficient: 31, defenseCoefficient: 20, agilityCoefficient: 24},
-            "타로곤": {initialCoefficient: 17, healthCoefficient: 27, attackCoefficient: 32, defenseCoefficient: 22, agilityCoefficient: 25},
-            "네고스": {initialCoefficient: 18, healthCoefficient: 29, attackCoefficient: 32, defenseCoefficient: 22, agilityCoefficient: 24},
-            "아고아": {initialCoefficient: 20, healthCoefficient: 24, attackCoefficient: 33, defenseCoefficient: 18, agilityCoefficient: 24},
-            "돌북이": {initialCoefficient: 20, healthCoefficient: 24, attackCoefficient: 20, defenseCoefficient: 45, agilityCoefficient: 9},
-            "깡북이": {initialCoefficient: 12, healthCoefficient: 22, attackCoefficient: 25, defenseCoefficient: 36, agilityCoefficient: 10},
-            "북이": {initialCoefficient: 14, healthCoefficient: 23, attackCoefficient: 21, defenseCoefficient: 40, agilityCoefficient: 9},
-            "노북이": {initialCoefficient: 14, healthCoefficient: 23, attackCoefficient: 21, defenseCoefficient: 37, agilityCoefficient: 11},
-            "베로포리": {initialCoefficient: 20, healthCoefficient: 32, attackCoefficient: 24, defenseCoefficient: 35, agilityCoefficient: 15},
-            "베로보크": {initialCoefficient: 23, healthCoefficient: 35, attackCoefficient: 19, defenseCoefficient: 37, agilityCoefficient: 15},
-            "베로로크": {initialCoefficient: 19, healthCoefficient: 33, attackCoefficient: 20, defenseCoefficient: 39, agilityCoefficient: 14},
-            "베론": {initialCoefficient: 24, healthCoefficient: 36, attackCoefficient: 20, defenseCoefficient: 36, agilityCoefficient: 15},
-            "칼로스": {initialCoefficient: 25, healthCoefficient: 24, attackCoefficient: 37, defenseCoefficient: 16, agilityCoefficient: 26},
-            "도르도르": {initialCoefficient: 24, healthCoefficient: 26, attackCoefficient: 32, defenseCoefficient: 15, agilityCoefficient: 30},
-            "샤베르": {initialCoefficient: 27, healthCoefficient: 28, attackCoefficient: 33, defenseCoefficient: 13, agilityCoefficient: 30},
-            "파베로스": {initialCoefficient: 27, healthCoefficient: 22, attackCoefficient: 31, defenseCoefficient: 12, agilityCoefficient: 28},
-            "갈푸스": {initialCoefficient: 27, healthCoefficient: 23, attackCoefficient: 34, defenseCoefficient: 12, agilityCoefficient: 29},
-            "카우거": {initialCoefficient: 27, healthCoefficient: 25, attackCoefficient: 32, defenseCoefficient: 14, agilityCoefficient: 28},
-            "지가로스": {initialCoefficient: 25, healthCoefficient: 25, attackCoefficient: 35, defenseCoefficient: 19, agilityCoefficient: 25},
-            "연두큐이": {initialCoefficient: 18, healthCoefficient: 22, attackCoefficient: 25, defenseCoefficient: 18, agilityCoefficient: 33},
-            "베노투리": {initialCoefficient: 22, healthCoefficient: 42, attackCoefficient: 19, defenseCoefficient: 41, agilityCoefficient: 12},
-            "라스키": {initialCoefficient: 19, healthCoefficient: 22, attackCoefficient: 30, defenseCoefficient: 12, agilityCoefficient: 33},
-            "베로바드": {initialCoefficient: 23, healthCoefficient: 42, attackCoefficient: 23, defenseCoefficient: 38, agilityCoefficient: 11},
-            "노스키": {initialCoefficient: 18, healthCoefficient: 22, attackCoefficient: 29, defenseCoefficient: 11, agilityCoefficient: 35},
-            "노투투": {initialCoefficient: 16, healthCoefficient: 23, attackCoefficient: 27, defenseCoefficient: 10, agilityCoefficient: 41},
-            "푸룡": {initialCoefficient: 25, healthCoefficient: 27, attackCoefficient: 34, defenseCoefficient: 19, agilityCoefficient: 25},
-            "노르곤": {initialCoefficient: 25, healthCoefficient: 23, attackCoefficient: 35, defenseCoefficient: 18, agilityCoefficient: 27},
-            "블루카비트": {initialCoefficient: 19, healthCoefficient: 26, attackCoefficient: 25, defenseCoefficient: 20, agilityCoefficient: 34},
-            "푸투투": {initialCoefficient: 16, healthCoefficient: 25, attackCoefficient: 27, defenseCoefficient: 12, agilityCoefficient: 39},
-            "아이스만모": {initialCoefficient: 26, healthCoefficient: 52, attackCoefficient: 28, defenseCoefficient: 23, agilityCoefficient: 10},
-            "성호": {initialCoefficient: 25, healthCoefficient: 28, attackCoefficient: 32, defenseCoefficient: 14, agilityCoefficient: 31},
-            "녹룡": {initialCoefficient: 27, healthCoefficient: 26, attackCoefficient: 37, defenseCoefficient: 25, agilityCoefficient: 17},
-            "기라노": {initialCoefficient: 28, healthCoefficient: 29, attackCoefficient: 38, defenseCoefficient: 17, agilityCoefficient: 21},
-            "크누스": {initialCoefficient: 21, healthCoefficient: 20, attackCoefficient: 31, defenseCoefficient: 14, agilityCoefficient: 26},
-            "흑카키": {initialCoefficient: 18, healthCoefficient: 23, attackCoefficient: 27, defenseCoefficient: 14, agilityCoefficient: 39},
-            "바우트": {initialCoefficient: 24, healthCoefficient: 35, attackCoefficient: 38, defenseCoefficient: 30, agilityCoefficient: 4},
-            "샤크론": {initialCoefficient: 24, healthCoefficient: 30, attackCoefficient: 34, defenseCoefficient: 12, agilityCoefficient: 29},
-            "히파": {initialCoefficient: 20, healthCoefficient: 21, attackCoefficient: 29, defenseCoefficient: 10, agilityCoefficient: 37},
-            "델타르돈": {initialCoefficient: 24, healthCoefficient: 27, attackCoefficient: 34, defenseCoefficient: 20, agilityCoefficient: 23},
-            "카르카로돈": {initialCoefficient: 23, healthCoefficient: 25, attackCoefficient: 32, defenseCoefficient: 14, agilityCoefficient: 31},
-            "킹우리": {initialCoefficient: 19, healthCoefficient: 28, attackCoefficient: 31, defenseCoefficient: 15, agilityCoefficient: 31},
-            "스피노": {initialCoefficient: 25, healthCoefficient: 26, attackCoefficient: 40, defenseCoefficient: 15, agilityCoefficient: 23},
-            "사이록스": {initialCoefficient: 25, healthCoefficient: 24, attackCoefficient: 34, defenseCoefficient: 14, agilityCoefficient: 31},
-            "푸비토스": {initialCoefficient: 24, healthCoefficient: 39, attackCoefficient: 33, defenseCoefficient: 29, agilityCoefficient: 7},
-            "설호": {initialCoefficient: 22, healthCoefficient: 26, attackCoefficient: 33, defenseCoefficient: 14, agilityCoefficient: 30},
-            "스노우링": {initialCoefficient: 17, healthCoefficient: 27, attackCoefficient: 27, defenseCoefficient: 12, agilityCoefficient: 33},
-            "산타링코": {initialCoefficient: 21, healthCoefficient: 29, attackCoefficient: 31, defenseCoefficient: 13, agilityCoefficient: 31},
-            "백가로스": {initialCoefficient: 24, healthCoefficient: 28, attackCoefficient: 32, defenseCoefficient: 25, agilityCoefficient: 20},
-            "하기로": {initialCoefficient: 25, healthCoefficient: 30, attackCoefficient: 37, defenseCoefficient: 16, agilityCoefficient: 22},
-            "산타로비": {initialCoefficient: 24, healthCoefficient: 28, attackCoefficient: 31, defenseCoefficient: 22, agilityCoefficient: 24},
-            "산타야무리": {initialCoefficient: 24, healthCoefficient: 34, attackCoefficient: 36, defenseCoefficient: 28, agilityCoefficient: 12},
-            "돌프": {initialCoefficient: 25, healthCoefficient: 25, attackCoefficient: 34, defenseCoefficient: 16, agilityCoefficient: 29},
-            "람쥐": {initialCoefficient: 22, healthCoefficient: 23, attackCoefficient: 29, defenseCoefficient: 11, agilityCoefficient: 39},
-            "꾸꾸리": {initialCoefficient: 22, healthCoefficient: 27, attackCoefficient: 31, defenseCoefficient: 28, agilityCoefficient: 19},
-            "굴가스": {initialCoefficient: 22, healthCoefficient: 30, attackCoefficient: 26, defenseCoefficient: 43, agilityCoefficient: 6},
-            "쿨코카스": {initialCoefficient: 22, healthCoefficient: 35, attackCoefficient: 25, defenseCoefficient: 41, agilityCoefficient: 6},
-            "로로카스": {initialCoefficient: 22, healthCoefficient: 29, attackCoefficient: 31, defenseCoefficient: 38, agilityCoefficient: 7},
-            "옐로가스": {initialCoefficient: 22, healthCoefficient: 28, attackCoefficient: 27, defenseCoefficient: 40, agilityCoefficient: 10},
-            "아르마루": {initialCoefficient: 22, healthCoefficient: 25, attackCoefficient: 32, defenseCoefficient: 16, agilityCoefficient: 25},
-            "푸타푸타": {initialCoefficient: 22, healthCoefficient: 21, attackCoefficient: 26, defenseCoefficient: 10, agilityCoefficient: 31},
-            "흑기린": {initialCoefficient: 24, healthCoefficient: 30, attackCoefficient: 39, defenseCoefficient: 19, agilityCoefficient: 17},
-            "라이쿠스": {initialCoefficient: 23, healthCoefficient: 38, attackCoefficient: 30, defenseCoefficient: 33, agilityCoefficient: 7},
-            "테로노돈": {initialCoefficient: 21, healthCoefficient: 27, attackCoefficient: 26, defenseCoefficient: 9, agilityCoefficient: 37},
-            "메피노": {initialCoefficient: 23, healthCoefficient: 28, attackCoefficient: 38, defenseCoefficient: 15, agilityCoefficient: 23},
-            "어린흑룡": {initialCoefficient: 25, healthCoefficient: 24, attackCoefficient: 34, defenseCoefficient: 14, agilityCoefficient: 31},
-            "우라노스": {initialCoefficient: 22, healthCoefficient: 26, attackCoefficient: 31, defenseCoefficient: 16, agilityCoefficient: 30},
-            "언딘SD": {initialCoefficient: 26, healthCoefficient: 27, attackCoefficient: 40, defenseCoefficient: 21, agilityCoefficient: 17},
-            "헤티아SD": {initialCoefficient: 26, healthCoefficient: 29, attackCoefficient: 35, defenseCoefficient: 16, agilityCoefficient: 26},
-            "토라": {initialCoefficient: 22, healthCoefficient: 23, attackCoefficient: 32, defenseCoefficient: 15, agilityCoefficient: 31},
-            "데블로스": {initialCoefficient: 22, healthCoefficient: 22, attackCoefficient: 29, defenseCoefficient: 9, agilityCoefficient: 32},
-            "페르페": {initialCoefficient: 22, healthCoefficient: 29, attackCoefficient: 31, defenseCoefficient: 14, agilityCoefficient: 30},
-            "미니스": {initialCoefficient: 22, healthCoefficient: 25, attackCoefficient: 30, defenseCoefficient: 15, agilityCoefficient: 28},
-            "푸우리": {initialCoefficient: 19, healthCoefficient: 27, attackCoefficient: 31, defenseCoefficient: 17, agilityCoefficient: 29},
-            "노보스": {initialCoefficient: 24, healthCoefficient: 43, attackCoefficient: 32, defenseCoefficient: 20, agilityCoefficient: 12},
-            "라가로스": {initialCoefficient: 24, healthCoefficient: 33, attackCoefficient: 30, defenseCoefficient: 32, agilityCoefficient: 12},
-            "철북이": {initialCoefficient: 13, healthCoefficient: 24, attackCoefficient: 31, defenseCoefficient: 37, agilityCoefficient: 11},
-            "타키온": {initialCoefficient: 22, healthCoefficient: 28, attackCoefficient: 32, defenseCoefficient: 15, agilityCoefficient: 29},
-            "크로아치": {initialCoefficient: 23, healthCoefficient: 29, attackCoefficient: 35, defenseCoefficient: 19, agilityCoefficient: 21},
-            "그램고르": {initialCoefficient: 23, healthCoefficient: 31, attackCoefficient: 32, defenseCoefficient: 23, agilityCoefficient: 19},
-            "와일로": {initialCoefficient: 22, healthCoefficient: 44, attackCoefficient: 27, defenseCoefficient: 22, agilityCoefficient: 19},
-            "키파": {initialCoefficient: 18, healthCoefficient: 23, attackCoefficient: 28, defenseCoefficient: 13, agilityCoefficient: 38},
-            "가이": {initialCoefficient: 22, healthCoefficient: 47, attackCoefficient: 30, defenseCoefficient: 21, agilityCoefficient: 10},
-            "스코피온": {initialCoefficient: 22, healthCoefficient: 32, attackCoefficient: 29, defenseCoefficient: 33, agilityCoefficient: 13},
-            "스코피오": {initialCoefficient: 22, healthCoefficient: 34, attackCoefficient: 32, defenseCoefficient: 28, agilityCoefficient: 13},
-            "스코핀": {initialCoefficient: 22, healthCoefficient: 31, attackCoefficient: 35, defenseCoefficient: 28, agilityCoefficient: 14},
-            "스코피노": {initialCoefficient: 22, healthCoefficient: 31, attackCoefficient: 31, defenseCoefficient: 29, agilityCoefficient: 17},
-            "키로": {initialCoefficient: 23, healthCoefficient: 28, attackCoefficient: 35, defenseCoefficient: 16, agilityCoefficient: 26},
-            "로코": {initialCoefficient: 23, healthCoefficient: 26, attackCoefficient: 37, defenseCoefficient: 15, agilityCoefficient: 26},
-            "고로": {initialCoefficient: 24, healthCoefficient: 24, attackCoefficient: 37, defenseCoefficient: 15, agilityCoefficient: 26},
-            "슈우": {initialCoefficient: 22, healthCoefficient: 25, attackCoefficient: 30, defenseCoefficient: 15, agilityCoefficient: 28},
-            "스노밍코": {initialCoefficient: 22, healthCoefficient: 26, attackCoefficient: 30, defenseCoefficient: 13, agilityCoefficient: 29},
-            "쿠팡": {initialCoefficient: 22, healthCoefficient: 22, attackCoefficient: 26, defenseCoefficient: 12, agilityCoefficient: 32},
-            "크랩": {initialCoefficient: 23, healthCoefficient: 40, attackCoefficient: 27, defenseCoefficient: 35, agilityCoefficient: 6},
-            "킹크랩": {initialCoefficient: 23, healthCoefficient: 36, attackCoefficient: 32, defenseCoefficient: 32, agilityCoefficient: 8},
-            "라포루스": {initialCoefficient: 23, healthCoefficient: 36, attackCoefficient: 30, defenseCoefficient: 32, agilityCoefficient: 10},
-            "알로프": {initialCoefficient: 24, healthCoefficient: 27, attackCoefficient: 34, defenseCoefficient: 21, agilityCoefficient: 22},
-            "이카스": {initialCoefficient: 23, healthCoefficient: 33, attackCoefficient: 25, defenseCoefficient: 37, agilityCoefficient: 13},
-            "페로도": {initialCoefficient: 25, healthCoefficient: 30, attackCoefficient: 30, defenseCoefficient: 30, agilityCoefficient: 17},
-            "크루거": {initialCoefficient: 26, healthCoefficient: 28, attackCoefficient: 33, defenseCoefficient: 15, agilityCoefficient: 29},
-            "가우": {initialCoefficient: 26, healthCoefficient: 27, attackCoefficient: 36, defenseCoefficient: 17, agilityCoefficient: 26},
-            "아리": {initialCoefficient: 24, healthCoefficient: 22, attackCoefficient: 30, defenseCoefficient: 11, agilityCoefficient: 39},
-            "로제드래곤": {initialCoefficient: 26, healthCoefficient: 26, attackCoefficient: 35, defenseCoefficient: 15, agilityCoefficient: 29},
-            "노라돈": {initialCoefficient: 26, healthCoefficient: 24, attackCoefficient: 34, defenseCoefficient: 14, agilityCoefficient: 25},
-            "녹우리": {initialCoefficient: 18, healthCoefficient: 25, attackCoefficient: 29, defenseCoefficient: 19, agilityCoefficient: 30},
-            "물북이": {initialCoefficient: 16, healthCoefficient: 35, attackCoefficient: 25, defenseCoefficient: 40, agilityCoefficient: 7},
-            "포포": {initialCoefficient: 16, healthCoefficient: 20, attackCoefficient: 28, defenseCoefficient: 10, agilityCoefficient: 38},
-            "코리노로스": {initialCoefficient: 25, healthCoefficient: 37, attackCoefficient: 26, defenseCoefficient: 23, agilityCoefficient: 24},
-            "푸테라": {initialCoefficient: 25, healthCoefficient: 29, attackCoefficient: 33, defenseCoefficient: 18, agilityCoefficient: 26},
-            "노라키토스": {initialCoefficient: 25, healthCoefficient: 36, attackCoefficient: 30, defenseCoefficient: 32, agilityCoefficient: 11},
-            "기비노": {initialCoefficient: 25, healthCoefficient: 25, attackCoefficient: 41, defenseCoefficient: 15, agilityCoefficient: 22},
-            "백설토끼": {initialCoefficient: 24, healthCoefficient: 30, attackCoefficient: 33, defenseCoefficient: 22, agilityCoefficient: 21},
-            "토끼": {initialCoefficient: 18, healthCoefficient: 27, attackCoefficient: 29, defenseCoefficient: 13, agilityCoefficient: 35},
-            "태룡": {initialCoefficient: 24, healthCoefficient: 24, attackCoefficient: 33, defenseCoefficient: 16, agilityCoefficient: 30},
-            "스노우드래곤": {initialCoefficient: 26, healthCoefficient: 28, attackCoefficient: 36, defenseCoefficient: 19, agilityCoefficient: 23},
-            "크라브": {initialCoefficient: 16, healthCoefficient: 28, attackCoefficient: 29, defenseCoefficient: 40, agilityCoefficient: 9},
-            "핑코": {initialCoefficient: 26, healthCoefficient: 25, attackCoefficient: 34, defenseCoefficient: 14, agilityCoefficient: 31},
-            "라그노스": {initialCoefficient: 26, healthCoefficient: 38, attackCoefficient: 33, defenseCoefficient: 32, agilityCoefficient: 6},
-            "레이론": {initialCoefficient: 24, healthCoefficient: 28, attackCoefficient: 34, defenseCoefficient: 16, agilityCoefficient: 26},
-            "메카토스": {initialCoefficient: 25, healthCoefficient: 35, attackCoefficient: 35, defenseCoefficient: 29, agilityCoefficient: 8},
-            "흑토끼": {initialCoefficient: 24, healthCoefficient: 27, attackCoefficient: 35, defenseCoefficient: 22, agilityCoefficient: 21},
-            "복우리": {initialCoefficient: 18, healthCoefficient: 25, attackCoefficient: 29, defenseCoefficient: 18, agilityCoefficient: 32},
-            "테이노스": {initialCoefficient: 27, healthCoefficient: 27, attackCoefficient: 40, defenseCoefficient: 15, agilityCoefficient: 23},
-            "푸이": {initialCoefficient: 22, healthCoefficient: 52, attackCoefficient: 32, defenseCoefficient: 16, agilityCoefficient: 12},
-            "푸비": {initialCoefficient: 22, healthCoefficient: 49, attackCoefficient: 32, defenseCoefficient: 17, agilityCoefficient: 12},
-            "깡우비": {initialCoefficient: 22, healthCoefficient: 41, attackCoefficient: 37, defenseCoefficient: 16, agilityCoefficient: 13},
-            "아코로비": {initialCoefficient: 24, healthCoefficient: 32, attackCoefficient: 33, defenseCoefficient: 19, agilityCoefficient: 22},
-            "지라크": {initialCoefficient: 22, healthCoefficient: 24, attackCoefficient: 34, defenseCoefficient: 17, agilityCoefficient: 23},
-            "포루나": {initialCoefficient: 19, healthCoefficient: 24, attackCoefficient: 31, defenseCoefficient: 14, agilityCoefficient: 32},
-            "피피아": {initialCoefficient: 19, healthCoefficient: 26, attackCoefficient: 32, defenseCoefficient: 13, agilityCoefficient: 31},
-            "비노": {initialCoefficient: 23, healthCoefficient: 27, attackCoefficient: 35, defenseCoefficient: 17, agilityCoefficient: 19},
-            "기로": {initialCoefficient: 29, healthCoefficient: 30, attackCoefficient: 37, defenseCoefficient: 16, agilityCoefficient: 22},
-            "보로": {initialCoefficient: 27, healthCoefficient: 26, attackCoefficient: 37, defenseCoefficient: 15, agilityCoefficient: 21},
-            "기노": {initialCoefficient: 26, healthCoefficient: 25, attackCoefficient: 38, defenseCoefficient: 14, agilityCoefficient: 21},
-            "르돈": {initialCoefficient: 25, healthCoefficient: 25, attackCoefficient: 36, defenseCoefficient: 13, agilityCoefficient: 24},
-            "보르비스": {initialCoefficient: 25, healthCoefficient: 28, attackCoefficient: 32, defenseCoefficient: 20, agilityCoefficient: 26},
-            "포레스트크랩": {initialCoefficient: 21, healthCoefficient: 41, attackCoefficient: 30, defenseCoefficient: 41, agilityCoefficient: 7},
-            "그린고르": {initialCoefficient: 25, healthCoefficient: 29, attackCoefficient: 32, defenseCoefficient: 32, agilityCoefficient: 14},
-            "유미": {initialCoefficient: 100, healthCoefficient: 100, attackCoefficient: 100, defenseCoefficient: 100, agilityCoefficient: 100},
-            "쿠아": {initialCoefficient: 22, healthCoefficient: 27, attackCoefficient: 28, defenseCoefficient: 12, agilityCoefficient: 27},
-            "기고아": {initialCoefficient: 23, healthCoefficient: 28, attackCoefficient: 33, defenseCoefficient: 23, agilityCoefficient: 22},
-            "타르프스": {initialCoefficient: 19, healthCoefficient: 32, attackCoefficient: 28, defenseCoefficient: 37, agilityCoefficient: 12},
-            "꼬꼬미": {initialCoefficient: 20, healthCoefficient: 23, attackCoefficient: 25, defenseCoefficient: 18, agilityCoefficient: 32},
-            "마르크스": {initialCoefficient: 24, healthCoefficient: 33, attackCoefficient: 34, defenseCoefficient: 18, agilityCoefficient: 21},
-            "마몽": {initialCoefficient: 24, healthCoefficient: 49, attackCoefficient: 21, defenseCoefficient: 32, agilityCoefficient: 14},
-            "모라스": {initialCoefficient: 24, healthCoefficient: 39, attackCoefficient: 28, defenseCoefficient: 34, agilityCoefficient: 7},
-            "트레길로": {initialCoefficient: 24, healthCoefficient: 34, attackCoefficient: 34, defenseCoefficient: 27, agilityCoefficient: 13},
-            "포세이온": {initialCoefficient: 25, healthCoefficient: 36, attackCoefficient: 37, defenseCoefficient: 19, agilityCoefficient: 18},
-            "테이푸스": {initialCoefficient: 26, healthCoefficient: 27, attackCoefficient: 35, defenseCoefficient: 14, agilityCoefficient: 30},
-            "베톤": {initialCoefficient: 23, healthCoefficient: 43, attackCoefficient: 18, defenseCoefficient: 43, agilityCoefficient: 11},
-            "고루루": {initialCoefficient: 25, healthCoefficient: 27, attackCoefficient: 34, defenseCoefficient: 13, agilityCoefficient: 31},
-            "꼬이미": {initialCoefficient: 25, healthCoefficient: 25, attackCoefficient: 31, defenseCoefficient: 13, agilityCoefficient: 34},
-            "코발스": {initialCoefficient: 17, healthCoefficient: 38, attackCoefficient: 28, defenseCoefficient: 34, agilityCoefficient: 12},
-            "판그": {initialCoefficient: 19, healthCoefficient: 31, attackCoefficient: 37, defenseCoefficient: 21, agilityCoefficient: 17},
-            "카이비": {initialCoefficient: 18, healthCoefficient: 24, attackCoefficient: 26, defenseCoefficient: 15, agilityCoefficient: 39},
-            "만모드": {initialCoefficient: 27, healthCoefficient: 49, attackCoefficient: 26, defenseCoefficient: 27, agilityCoefficient: 8},
-            "쥬니": {initialCoefficient: 22, healthCoefficient: 23, attackCoefficient: 29, defenseCoefficient: 19, agilityCoefficient: 33},
-            "바쿠": {initialCoefficient: 19, healthCoefficient: 24, attackCoefficient: 27, defenseCoefficient: 26, agilityCoefficient: 29},
-            "쥬키": {initialCoefficient: 19, healthCoefficient: 22, attackCoefficient: 27, defenseCoefficient: 13, agilityCoefficient: 40},
-            "기바바": {initialCoefficient: 23, healthCoefficient: 27, attackCoefficient: 29, defenseCoefficient: 19, agilityCoefficient: 30},
-            "베로노크": {initialCoefficient: 23, healthCoefficient: 40, attackCoefficient: 22, defenseCoefficient: 37, agilityCoefficient: 15},
-            "푸쿠": {initialCoefficient: 20, healthCoefficient: 21, attackCoefficient: 34, defenseCoefficient: 19, agilityCoefficient: 29},
-            "푸타카": {initialCoefficient: 21, healthCoefficient: 26, attackCoefficient: 26, defenseCoefficient: 15, agilityCoefficient: 39},
-            "브라키오스": {initialCoefficient: 25, healthCoefficient: 37, attackCoefficient: 30, defenseCoefficient: 34, agilityCoefficient: 7},
-            "테이혼": {initialCoefficient: 27, healthCoefficient: 23, attackCoefficient: 34, defenseCoefficient: 17, agilityCoefficient: 30},
-            "테이루스": {initialCoefficient: 25, healthCoefficient: 22, attackCoefficient: 29, defenseCoefficient: 9, agilityCoefficient: 39},
-            "파이카스": {initialCoefficient: 25, healthCoefficient: 34, attackCoefficient: 30, defenseCoefficient: 38, agilityCoefficient: 6},
-            "리바이어던": {initialCoefficient: 25, healthCoefficient: 30, attackCoefficient: 29, defenseCoefficient: 14, agilityCoefficient: 34},
-            "지주작": {initialCoefficient: 25, healthCoefficient: 26, attackCoefficient: 31, defenseCoefficient: 14, agilityCoefficient: 34},
-            "노르페": {initialCoefficient: 24, healthCoefficient: 22, attackCoefficient: 35, defenseCoefficient: 14, agilityCoefficient: 30},
-            "야크노": {initialCoefficient: 24, healthCoefficient: 26, attackCoefficient: 36, defenseCoefficient: 17, agilityCoefficient: 25},
-            "펜녹스": {initialCoefficient: 24, healthCoefficient: 29, attackCoefficient: 36, defenseCoefficient: 17, agilityCoefficient: 23},
-            "데빌바로스": {initialCoefficient: 24, healthCoefficient: 26, attackCoefficient: 37, defenseCoefficient: 17, agilityCoefficient: 25},
-            "레피아": {initialCoefficient: 23, healthCoefficient: 24, attackCoefficient: 32, defenseCoefficient: 15, agilityCoefficient: 32},
-            "지룡": {initialCoefficient: 25, healthCoefficient: 27, attackCoefficient: 33, defenseCoefficient: 16, agilityCoefficient: 30},
-            "주작": {initialCoefficient: 26, healthCoefficient: 24, attackCoefficient: 33, defenseCoefficient: 11, agilityCoefficient: 35},
-            "지고르": {initialCoefficient: 24, healthCoefficient: 30, attackCoefficient: 32, defenseCoefficient: 22, agilityCoefficient: 21},
-            "고루바": {initialCoefficient: 25, healthCoefficient: 29, attackCoefficient: 32, defenseCoefficient: 32, agilityCoefficient: 14},
-            "백구": {initialCoefficient: 23, healthCoefficient: 26, attackCoefficient: 31, defenseCoefficient: 16, agilityCoefficient: 30},
-            "노트로스": {initialCoefficient: 27, healthCoefficient: 33, attackCoefficient: 32, defenseCoefficient: 32, agilityCoefficient: 12},
-            "가이아": {initialCoefficient: 27, healthCoefficient: 25, attackCoefficient: 34, defenseCoefficient: 16, agilityCoefficient: 19},
-            "아쿠아": {initialCoefficient: 27, healthCoefficient: 31, attackCoefficient: 37, defenseCoefficient: 16, agilityCoefficient: 22},
-            "마그마": {initialCoefficient: 27, healthCoefficient: 27, attackCoefficient: 41, defenseCoefficient: 16, agilityCoefficient: 21},
-            "아리아": {initialCoefficient: 27, healthCoefficient: 27, attackCoefficient: 37, defenseCoefficient: 15, agilityCoefficient: 26},
-            "범링": {initialCoefficient: 19, healthCoefficient: 22, attackCoefficient: 27, defenseCoefficient: 17, agilityCoefficient: 35},
-            "푸투": {initialCoefficient: 16, healthCoefficient: 21, attackCoefficient: 27, defenseCoefficient: 13, agilityCoefficient: 40},
-            "테라노돈": {initialCoefficient: 20, healthCoefficient: 23, attackCoefficient: 27, defenseCoefficient: 13, agilityCoefficient: 38},
-            "시스타": {initialCoefficient: 24, healthCoefficient: 33, attackCoefficient: 33, defenseCoefficient: 32, agilityCoefficient: 9},
-            "스타크": {initialCoefficient: 24, healthCoefficient: 37, attackCoefficient: 29, defenseCoefficient: 35, agilityCoefficient: 6},
-            "펠트로돈": {initialCoefficient: 24, healthCoefficient: 31, attackCoefficient: 34, defenseCoefficient: 17, agilityCoefficient: 23},
-            "플라워크랩": {initialCoefficient: 23, healthCoefficient: 33, attackCoefficient: 27, defenseCoefficient: 37, agilityCoefficient: 10},
-            "베이터": {initialCoefficient: 22, healthCoefficient: 40, attackCoefficient: 21, defenseCoefficient: 37, agilityCoefficient: 13},
-            "카이언": {initialCoefficient: 23, healthCoefficient: 25, attackCoefficient: 32, defenseCoefficient: 16, agilityCoefficient: 30},
-            "도라오닉스": {initialCoefficient: 24, healthCoefficient: 27, attackCoefficient: 31, defenseCoefficient: 30, agilityCoefficient: 17},
-            "초가로스": {initialCoefficient: 24, healthCoefficient: 25, attackCoefficient: 36, defenseCoefficient: 17, agilityCoefficient: 26},
-            "비루": {initialCoefficient: 24, healthCoefficient: 28, attackCoefficient: 36, defenseCoefficient: 18, agilityCoefficient: 23},
-            "테라시온": {initialCoefficient: 25, healthCoefficient: 28, attackCoefficient: 37, defenseCoefficient: 25, agilityCoefficient: 16},
-            "돌꼬비": {initialCoefficient: 25, healthCoefficient: 27, attackCoefficient: 30, defenseCoefficient: 14, agilityCoefficient: 34},
-            "치크모": {initialCoefficient: 22, healthCoefficient: 27, attackCoefficient: 24, defenseCoefficient: 39, agilityCoefficient: 13},
-            "로라미우스": {initialCoefficient: 24, healthCoefficient: 25, attackCoefficient: 35, defenseCoefficient: 13, agilityCoefficient: 25},
-            "로미": {initialCoefficient: 23, healthCoefficient: 25, attackCoefficient: 28, defenseCoefficient: 16, agilityCoefficient: 30},
-            "찌르콕": {initialCoefficient: 20, healthCoefficient: 24, attackCoefficient: 29, defenseCoefficient: 13, agilityCoefficient: 36},
-            "그린바로스": {initialCoefficient: 23, healthCoefficient: 24, attackCoefficient: 33, defenseCoefficient: 18, agilityCoefficient: 28},
-            "바로스": {initialCoefficient: 23, healthCoefficient: 23, attackCoefficient: 33, defenseCoefficient: 17, agilityCoefficient: 29},
-            "케로베로스": {initialCoefficient: 24, healthCoefficient: 30, attackCoefficient: 35, defenseCoefficient: 13, agilityCoefficient: 26},
-            "라두스": {initialCoefficient: 24, healthCoefficient: 37, attackCoefficient: 32, defenseCoefficient: 31, agilityCoefficient: 6},
-            "스티지": {initialCoefficient: 23, healthCoefficient: 23, attackCoefficient: 33, defenseCoefficient: 14, agilityCoefficient: 32},
-            "스커지": {initialCoefficient: 23, healthCoefficient: 23, attackCoefficient: 31, defenseCoefficient: 16, agilityCoefficient: 32},
-            "파이언": {initialCoefficient: 24, healthCoefficient: 28, attackCoefficient: 35, defenseCoefficient: 20, agilityCoefficient: 22},
-            "코스타리카": {initialCoefficient: 23, healthCoefficient: 22, attackCoefficient: 35, defenseCoefficient: 17, agilityCoefficient: 28},
-            "아카시스": {initialCoefficient: 24, healthCoefficient: 25, attackCoefficient: 38, defenseCoefficient: 15, agilityCoefficient: 26},
-            "메르메르": {initialCoefficient: 23, healthCoefficient: 23, attackCoefficient: 32, defenseCoefficient: 18, agilityCoefficient: 30},
-            "물범": {initialCoefficient: 24, healthCoefficient: 32, attackCoefficient: 29, defenseCoefficient: 32, agilityCoefficient: 15},
-            "베이": {initialCoefficient: 25, healthCoefficient: 31, attackCoefficient: 34, defenseCoefficient: 24, agilityCoefficient: 19},
-            "슬라미": {initialCoefficient: 24, healthCoefficient: 23, attackCoefficient: 27, defenseCoefficient: 12, agilityCoefficient: 40},
-            "팽팽": {initialCoefficient: 25, healthCoefficient: 31, attackCoefficient: 32, defenseCoefficient: 31, agilityCoefficient: 14},
-            "문타": {initialCoefficient: 23, healthCoefficient: 23, attackCoefficient: 35, defenseCoefficient: 15, agilityCoefficient: 29},
-            "실프리온": {initialCoefficient: 25, healthCoefficient: 27, attackCoefficient: 37, defenseCoefficient: 15, agilityCoefficient: 26},
-            "막쿠마": {initialCoefficient: 25, healthCoefficient: 33, attackCoefficient: 34, defenseCoefficient: 32, agilityCoefficient: 9},
-            "모사크": {initialCoefficient: 25, healthCoefficient: 30, attackCoefficient: 39, defenseCoefficient: 18, agilityCoefficient: 18},
-            "피닉스": {initialCoefficient: 21, healthCoefficient: 22, attackCoefficient: 32, defenseCoefficient: 10, agilityCoefficient: 38},
-            "풍백": {initialCoefficient: 25, healthCoefficient: 23, attackCoefficient: 32, defenseCoefficient: 10, agilityCoefficient: 33},
-            "테이로스": {initialCoefficient: 27, healthCoefficient: 32, attackCoefficient: 36, defenseCoefficient: 30, agilityCoefficient: 12},
-            "차라쿠": {initialCoefficient: 21, healthCoefficient: 22, attackCoefficient: 32, defenseCoefficient: 15, agilityCoefficient: 24},
-            "차란라쿠": {initialCoefficient: 21, healthCoefficient: 21, attackCoefficient: 33, defenseCoefficient: 14, agilityCoefficient: 24},
-            "천호": {initialCoefficient: 27, healthCoefficient: 23, attackCoefficient: 34, defenseCoefficient: 14, agilityCoefficient: 32},
-            "아기성호": {initialCoefficient: 24, healthCoefficient: 27, attackCoefficient: 32, defenseCoefficient: 15, agilityCoefficient: 30},
-            "메카르노": {initialCoefficient: 26, healthCoefficient: 28, attackCoefficient: 36, defenseCoefficient: 16, agilityCoefficient: 26},
-            "루미니온": {initialCoefficient: 25, healthCoefficient: 28, attackCoefficient: 38, defenseCoefficient: 19, agilityCoefficient: 21},
-            "메가죠": {initialCoefficient: 25, healthCoefficient: 27, attackCoefficient: 39, defenseCoefficient: 17, agilityCoefficient: 22},
-            "백기린": {initialCoefficient: 25, healthCoefficient: 26, attackCoefficient: 38, defenseCoefficient: 15, agilityCoefficient: 25},
-            "치우바커": {initialCoefficient: 26, healthCoefficient: 26, attackCoefficient: 36, defenseCoefficient: 16, agilityCoefficient: 26},
-            "그린바커": {initialCoefficient: 26, healthCoefficient: 28, attackCoefficient: 35, defenseCoefficient: 19, agilityCoefficient: 23},
-            "레인바커": {initialCoefficient: 26, healthCoefficient: 30, attackCoefficient: 35, defenseCoefficient: 17, agilityCoefficient: 23},
-            "파이바커": {initialCoefficient: 26, healthCoefficient: 26, attackCoefficient: 38, defenseCoefficient: 16, agilityCoefficient: 24},
-            "루보스": {initialCoefficient: 24, healthCoefficient: 47, attackCoefficient: 26, defenseCoefficient: 26, agilityCoefficient: 10},
-            "누이": {initialCoefficient: 24, healthCoefficient: 43, attackCoefficient: 26, defenseCoefficient: 27, agilityCoefficient: 11},
-            "타로아": {initialCoefficient: 19, healthCoefficient: 26, attackCoefficient: 34, defenseCoefficient: 19, agilityCoefficient: 25},
-            "골드곤": {initialCoefficient: 19, healthCoefficient: 25, attackCoefficient: 33, defenseCoefficient: 23, agilityCoefficient: 23},
-            "골드테라곤": {initialCoefficient: 25, healthCoefficient: 23, attackCoefficient: 34, defenseCoefficient: 19, agilityCoefficient: 26},
-            "푸토라지": {initialCoefficient: 26, healthCoefficient: 40, attackCoefficient: 21, defenseCoefficient: 30, agilityCoefficient: 19},
-            "석화케스": {initialCoefficient: 24, healthCoefficient: 35, attackCoefficient: 38, defenseCoefficient: 17, agilityCoefficient: 17},
-            "바카우": {initialCoefficient: 19, healthCoefficient: 23, attackCoefficient: 31, defenseCoefficient: 20, agilityCoefficient: 30},
-            "타르쿠": {initialCoefficient: 18, healthCoefficient: 23, attackCoefficient: 26, defenseCoefficient: 16, agilityCoefficient: 38},
-            "자라북": {initialCoefficient: 16, healthCoefficient: 33, attackCoefficient: 25, defenseCoefficient: 42, agilityCoefficient: 7},
-            "디로로크스": {initialCoefficient: 23, healthCoefficient: 24, attackCoefficient: 33, defenseCoefficient: 15, agilityCoefficient: 31},
-            "진주토로스": {initialCoefficient: 22, healthCoefficient: 31, attackCoefficient: 27, defenseCoefficient: 31, agilityCoefficient: 18},
-            "키라비": {initialCoefficient: 18, healthCoefficient: 23, attackCoefficient: 28, defenseCoefficient: 13, agilityCoefficient: 39},
-            "타노프스": {initialCoefficient: 19, healthCoefficient: 34, attackCoefficient: 31, defenseCoefficient: 34, agilityCoefficient: 10},
-            "실버로스": {initialCoefficient: 25, healthCoefficient: 51, attackCoefficient: 26, defenseCoefficient: 24, agilityCoefficient: 10},
-            "푸모나스": {initialCoefficient: 25, healthCoefficient: 54, attackCoefficient: 26, defenseCoefficient: 23, agilityCoefficient: 10},
-            "실버라곤": {initialCoefficient: 25, healthCoefficient: 26, attackCoefficient: 31, defenseCoefficient: 20, agilityCoefficient: 27},
-            "테라돈": {initialCoefficient: 25, healthCoefficient: 30, attackCoefficient: 31, defenseCoefficient: 18, agilityCoefficient: 27},
-            "메카고르돈": {initialCoefficient: 25, healthCoefficient: 29, attackCoefficient: 35, defenseCoefficient: 22, agilityCoefficient: 21},
-            "메카북이": {initialCoefficient: 16, healthCoefficient: 30, attackCoefficient: 31, defenseCoefficient: 37, agilityCoefficient: 6},
-            "메카카키": {initialCoefficient: 20, healthCoefficient: 18, attackCoefficient: 28, defenseCoefficient: 10, agilityCoefficient: 32},
-            "메카기로": {initialCoefficient: 29, healthCoefficient: 30, attackCoefficient: 38, defenseCoefficient: 15, agilityCoefficient: 22},
-            "엘크룬": {initialCoefficient: 24, healthCoefficient: 26, attackCoefficient: 33, defenseCoefficient: 14, agilityCoefficient: 31},
-            "토우트": {initialCoefficient: 24, healthCoefficient: 39, attackCoefficient: 35, defenseCoefficient: 31, agilityCoefficient: 4},
-            "페가수스": {initialCoefficient: 24, healthCoefficient: 24, attackCoefficient: 37, defenseCoefficient: 11, agilityCoefficient: 31},
-            "메카비스": {initialCoefficient: 23, healthCoefficient: 25, attackCoefficient: 34, defenseCoefficient: 21, agilityCoefficient: 25},
-            "토룡": {initialCoefficient: 27, healthCoefficient: 23, attackCoefficient: 36, defenseCoefficient: 23, agilityCoefficient: 23},
-            "블랙드래곤": {initialCoefficient: 25, healthCoefficient: 23, attackCoefficient: 36, defenseCoefficient: 14, agilityCoefficient: 32},
-            "밤미": {initialCoefficient: 23, healthCoefficient: 23, attackCoefficient: 34, defenseCoefficient: 15, agilityCoefficient: 32},
-            "핑우리": {initialCoefficient: 18, healthCoefficient: 25, attackCoefficient: 31, defenseCoefficient: 18, agilityCoefficient: 30},
-            "포르비스": {initialCoefficient: 25, healthCoefficient: 25, attackCoefficient: 36, defenseCoefficient: 17, agilityCoefficient: 26},
-            "핑구": {initialCoefficient: 18, healthCoefficient: 23, attackCoefficient: 32, defenseCoefficient: 12, agilityCoefficient: 35},
-            "푸스": {initialCoefficient: 25, healthCoefficient: 35, attackCoefficient: 38, defenseCoefficient: 27, agilityCoefficient: 8},
-            "청룡": {initialCoefficient: 26, healthCoefficient: 28, attackCoefficient: 39, defenseCoefficient: 14, agilityCoefficient: 25},
-            "스톤크랩": {initialCoefficient: 23, healthCoefficient: 33, attackCoefficient: 27, defenseCoefficient: 40, agilityCoefficient: 7},
-            "발로스": {initialCoefficient: 22, healthCoefficient: 22, attackCoefficient: 26, defenseCoefficient: 12, agilityCoefficient: 37},
-            "브라키우스": {initialCoefficient: 25, healthCoefficient: 34, attackCoefficient: 38, defenseCoefficient: 28, agilityCoefficient: 7},
-            "야무리": {initialCoefficient: 24, healthCoefficient: 29, attackCoefficient: 38, defenseCoefficient: 27, agilityCoefficient: 13},
-            "흑귀": {initialCoefficient: 24, healthCoefficient: 25, attackCoefficient: 35, defenseCoefficient: 13, agilityCoefficient: 30},
-            "이구로스": {initialCoefficient: 24, healthCoefficient: 24, attackCoefficient: 35, defenseCoefficient: 14, agilityCoefficient: 30},
-            "비트로돈": {initialCoefficient: 23, healthCoefficient: 31, attackCoefficient: 36, defenseCoefficient: 29, agilityCoefficient: 10},
-            "볼케": {initialCoefficient: 25, healthCoefficient: 23, attackCoefficient: 38, defenseCoefficient: 12, agilityCoefficient: 29},
-            "이그니온": {initialCoefficient: 25, healthCoefficient: 28, attackCoefficient: 40, defenseCoefficient: 21, agilityCoefficient: 17},
-            "파이마론": {initialCoefficient: 21, healthCoefficient: 29, attackCoefficient: 35, defenseCoefficient: 26, agilityCoefficient: 17},
-            "케라베로스": {initialCoefficient: 24, healthCoefficient: 28, attackCoefficient: 37, defenseCoefficient: 14, agilityCoefficient: 25},
-            "태울프": {initialCoefficient: 23, healthCoefficient: 20, attackCoefficient: 29, defenseCoefficient: 12, agilityCoefficient: 35},
-            "베이로": {initialCoefficient: 22, healthCoefficient: 40, attackCoefficient: 23, defenseCoefficient: 37, agilityCoefficient: 11},
-            "라비루": {initialCoefficient: 23, healthCoefficient: 24, attackCoefficient: 32, defenseCoefficient: 16, agilityCoefficient: 27},
-            "백호": {initialCoefficient: 25, healthCoefficient: 26, attackCoefficient: 34, defenseCoefficient: 20, agilityCoefficient: 26},
-            "로데오": {initialCoefficient: 25, healthCoefficient: 24, attackCoefficient: 37, defenseCoefficient: 17, agilityCoefficient: 26},
-            "파이톤": {initialCoefficient: 24, healthCoefficient: 24, attackCoefficient: 38, defenseCoefficient: 15, agilityCoefficient: 26},
-            "타이판": {initialCoefficient: 24, healthCoefficient: 28, attackCoefficient: 36, defenseCoefficient: 15, agilityCoefficient: 25},
-            "차이혼": {initialCoefficient: 25, healthCoefficient: 28, attackCoefficient: 29, defenseCoefficient: 18, agilityCoefficient: 30},
-            "황호": {initialCoefficient: 24, healthCoefficient: 24, attackCoefficient: 34, defenseCoefficient: 17, agilityCoefficient: 29},
-            "흑호": {initialCoefficient: 24, healthCoefficient: 24, attackCoefficient: 35, defenseCoefficient: 16, agilityCoefficient: 28},
-            "청호": {initialCoefficient: 25, healthCoefficient: 29, attackCoefficient: 34, defenseCoefficient: 16, agilityCoefficient: 26},
-            "적호": {initialCoefficient: 25, healthCoefficient: 24, attackCoefficient: 38, defenseCoefficient: 15, agilityCoefficient: 25},
-            "골드드래곤": {initialCoefficient: 25, healthCoefficient: 22, attackCoefficient: 34, defenseCoefficient: 14, agilityCoefficient: 34},
-            "백룡": {initialCoefficient: 26, healthCoefficient: 27, attackCoefficient: 40, defenseCoefficient: 14, agilityCoefficient: 25},
-            "베라라": {initialCoefficient: 25, healthCoefficient: 24, attackCoefficient: 34, defenseCoefficient: 13, agilityCoefficient: 32},
-            "타우트": {initialCoefficient: 24, healthCoefficient: 34, attackCoefficient: 36, defenseCoefficient: 34, agilityCoefficient: 4},
-            "화이토스": {initialCoefficient: 25, healthCoefficient: 36, attackCoefficient: 31, defenseCoefficient: 30, agilityCoefficient: 12},
-            "아스타로": {initialCoefficient: 25, healthCoefficient: 28, attackCoefficient: 32, defenseCoefficient: 11, agilityCoefficient: 34},
-            "구루마루": {initialCoefficient: 23, healthCoefficient: 27, attackCoefficient: 36, defenseCoefficient: 14, agilityCoefficient: 28},
-            "부루마루": {initialCoefficient: 23, healthCoefficient: 30, attackCoefficient: 38, defenseCoefficient: 12, agilityCoefficient: 26},
-            "베르마루": {initialCoefficient: 23, healthCoefficient: 26, attackCoefficient: 36, defenseCoefficient: 13, agilityCoefficient: 30},
-            "어스드래곤": {initialCoefficient: 26, healthCoefficient: 26, attackCoefficient: 36, defenseCoefficient: 18, agilityCoefficient: 26},
-            "핑꼬미": {initialCoefficient: 25, healthCoefficient: 23, attackCoefficient: 32, defenseCoefficient: 14, agilityCoefficient: 36},
-            "본드래곤": {initialCoefficient: 25, healthCoefficient: 29, attackCoefficient: 35, defenseCoefficient: 20, agilityCoefficient: 24},
-            "다이아루스": {initialCoefficient: 26, healthCoefficient: 33, attackCoefficient: 30, defenseCoefficient: 25, agilityCoefficient: 23},
-            "청룡신": {initialCoefficient: 26, healthCoefficient: 27, attackCoefficient: 35, defenseCoefficient: 13, agilityCoefficient: 32},
-            "다크노스": {initialCoefficient: 27, healthCoefficient: 29, attackCoefficient: 40, defenseCoefficient: 17, agilityCoefficient: 21},
-            "라이데슬라": {initialCoefficient: 24, healthCoefficient: 37, attackCoefficient: 34, defenseCoefficient: 33, agilityCoefficient: 4},
-            "루탈파": {initialCoefficient: 23, healthCoefficient: 27, attackCoefficient: 28, defenseCoefficient: 14, agilityCoefficient: 36},
-            "피치부": {initialCoefficient: 23, healthCoefficient: 21, attackCoefficient: 32, defenseCoefficient: 10, agilityCoefficient: 34},
-            "메카청룡": {initialCoefficient: 26, healthCoefficient: 28, attackCoefficient: 37, defenseCoefficient: 15, agilityCoefficient: 27},
-            "테파": {initialCoefficient: 20, healthCoefficient: 21, attackCoefficient: 29, defenseCoefficient: 10, agilityCoefficient: 37},
-            "레오딘": {initialCoefficient: 25, healthCoefficient: 27, attackCoefficient: 36, defenseCoefficient: 13, agilityCoefficient: 29},
-            "블랙펄": {initialCoefficient: 25, healthCoefficient: 23, attackCoefficient: 34, defenseCoefficient: 14, agilityCoefficient: 34},
-            "설표": {initialCoefficient: 25, healthCoefficient: 22, attackCoefficient: 34, defenseCoefficient: 14, agilityCoefficient: 34},
-            "체리밍코": {initialCoefficient: 22, healthCoefficient: 23, attackCoefficient: 33, defenseCoefficient: 11, agilityCoefficient: 31},
-            "하라라": {initialCoefficient: 23, healthCoefficient: 26, attackCoefficient: 32, defenseCoefficient: 16, agilityCoefficient: 31},
-            "롤프": {initialCoefficient: 24, healthCoefficient: 24, attackCoefficient: 35, defenseCoefficient: 11, agilityCoefficient: 33},
-            "타우르스": {initialCoefficient: 26, healthCoefficient: 36, attackCoefficient: 37, defenseCoefficient: 27, agilityCoefficient: 9},
-            "델푸스": {initialCoefficient: 24, healthCoefficient: 26, attackCoefficient: 33, defenseCoefficient: 16, agilityCoefficient: 30},
-            "헬베로스": {initialCoefficient: 22, healthCoefficient: 23, attackCoefficient: 40, defenseCoefficient: 8, agilityCoefficient: 31},
-            "불여우": {initialCoefficient: 26, healthCoefficient: 23, attackCoefficient: 36, defenseCoefficient: 15, agilityCoefficient: 31},
-            "크로톤": {initialCoefficient: 26, healthCoefficient: 43, attackCoefficient: 36, defenseCoefficient: 27, agilityCoefficient: 7},
-            "바이론": {initialCoefficient: 24, healthCoefficient: 35, attackCoefficient: 36, defenseCoefficient: 16, agilityCoefficient: 22},
-            "다크론": {initialCoefficient: 24, healthCoefficient: 29, attackCoefficient: 38, defenseCoefficient: 13, agilityCoefficient: 26},
-            "마크론": {initialCoefficient: 24, healthCoefficient: 26, attackCoefficient: 36, defenseCoefficient: 12, agilityCoefficient: 31},
-            "샤베란": {initialCoefficient: 27, healthCoefficient: 25, attackCoefficient: 35, defenseCoefficient: 16, agilityCoefficient: 29},
-            "샤우트": {initialCoefficient: 24, healthCoefficient: 34, attackCoefficient: 35, defenseCoefficient: 32, agilityCoefficient: 7},
-            "밀모르": {initialCoefficient: 27, healthCoefficient: 49, attackCoefficient: 26, defenseCoefficient: 24, agilityCoefficient: 10},
-            "메카다이노": {initialCoefficient: 26, healthCoefficient: 42, attackCoefficient: 32, defenseCoefficient: 30, agilityCoefficient: 6},
-        // ------------26/5/14 추가시작 -----
-            "카르쿠": {initialCoefficient: 17, healthCoefficient: 24, attackCoefficient: 25, defenseCoefficient: 17, agilityCoefficient: 38},
-            "흑꼬비": {initialCoefficient: 18, healthCoefficient: 23, attackCoefficient: 28, defenseCoefficient: 18, agilityCoefficient: 35},
-            "흑무이": {initialCoefficient: 24, healthCoefficient: 43, attackCoefficient: 29, defenseCoefficient: 20, agilityCoefficient: 15},
-            "베모티스": {initialCoefficient: 24, healthCoefficient: 21, attackCoefficient: 31, defenseCoefficient: 10, agilityCoefficient: 40},
-            "바이겔": {initialCoefficient: 24, healthCoefficient: 50, attackCoefficient: 28, defenseCoefficient: 23, agilityCoefficient: 17},
-            "깜아리": {initialCoefficient: 25, healthCoefficient: 25, attackCoefficient: 32, defenseCoefficient: 11, agilityCoefficient: 37},
-            "청주작": {initialCoefficient: 25, healthCoefficient: 29, attackCoefficient: 32, defenseCoefficient: 11, agilityCoefficient: 34},
-            "라그라고스": {initialCoefficient: 27, healthCoefficient: 21, attackCoefficient: 33, defenseCoefficient: 10, agilityCoefficient: 39},
-            "테르가": {initialCoefficient: 25, healthCoefficient: 24, attackCoefficient: 33, defenseCoefficient: 13, agilityCoefficient: 33},
-            "골드문": {initialCoefficient: 22, healthCoefficient: 22, attackCoefficient: 33, defenseCoefficient: 15, agilityCoefficient: 34},
-            "펠푸스": {initialCoefficient: 25, healthCoefficient: 24, attackCoefficient: 33, defenseCoefficient: 17, agilityCoefficient: 30},
-            "그루동": {initialCoefficient: 24, healthCoefficient: 25, attackCoefficient: 33, defenseCoefficient: 19, agilityCoefficient: 27},
-            "골드크랩": {initialCoefficient: 23, healthCoefficient: 36, attackCoefficient: 32, defenseCoefficient: 32, agilityCoefficient: 6},
-            "철기돈": {initialCoefficient: 25, healthCoefficient: 27, attackCoefficient: 33, defenseCoefficient: 25, agilityCoefficient: 20},
-            "황룡": {initialCoefficient: 24, healthCoefficient: 25, attackCoefficient: 34, defenseCoefficient: 13, agilityCoefficient: 33},
-            "몽몽": {initialCoefficient: 25, healthCoefficient: 27, attackCoefficient: 34, defenseCoefficient: 16, agilityCoefficient: 29},
-            "블루몽": {initialCoefficient: 24, healthCoefficient: 30, attackCoefficient: 34, defenseCoefficient: 15, agilityCoefficient: 27},
-            "브로닝": {initialCoefficient: 24, healthCoefficient: 25, attackCoefficient: 35, defenseCoefficient: 14, agilityCoefficient: 30},
-            "카라베로스": {initialCoefficient: 24, healthCoefficient: 28, attackCoefficient: 37, defenseCoefficient: 14, agilityCoefficient: 25},
-            "백골로스": {initialCoefficient: 28, healthCoefficient: 24, attackCoefficient: 37, defenseCoefficient: 18, agilityCoefficient: 27},
-            "카우제": {initialCoefficient: 24, healthCoefficient: 33, attackCoefficient: 36, defenseCoefficient: 32, agilityCoefficient: 5},
-            "플라티우스": {initialCoefficient: 26, healthCoefficient: 32, attackCoefficient: 37, defenseCoefficient: 15, agilityCoefficient: 24},
-            "크라우": {initialCoefficient: 25, healthCoefficient: 33, attackCoefficient: 37, defenseCoefficient: 19, agilityCoefficient: 17},
-            "주가로스": {initialCoefficient: 26, healthCoefficient: 24, attackCoefficient: 38, defenseCoefficient: 17, agilityCoefficient: 26},
-            "메가로돈": {initialCoefficient: 25, healthCoefficient: 32, attackCoefficient: 38, defenseCoefficient: 15, agilityCoefficient: 21},
-            "골드본": {initialCoefficient: 27, healthCoefficient: 39, attackCoefficient: 37, defenseCoefficient: 27, agilityCoefficient: 8},
-            "홍여밍": {initialCoefficient: 24, healthCoefficient: 23, attackCoefficient: 39, defenseCoefficient: 14, agilityCoefficient: 27},
-            "켈로": {initialCoefficient: 27, healthCoefficient: 25, attackCoefficient: 39, defenseCoefficient: 17, agilityCoefficient: 25},
-            "나비드래곤": {initialCoefficient: 27, healthCoefficient: 23, attackCoefficient: 40, defenseCoefficient: 14, agilityCoefficient: 27},
-            "싸가트": {initialCoefficient: 25, healthCoefficient: 33, attackCoefficient: 41, defenseCoefficient: 15, agilityCoefficient: 17},
-            "옥토": {initialCoefficient: 24, healthCoefficient: 39, attackCoefficient: 37, defenseCoefficient: 27, agilityCoefficient: 6},
-            "그램푸": {initialCoefficient: 25, healthCoefficient: 31, attackCoefficient: 35, defenseCoefficient: 18, agilityCoefficient: 25},
-            "허미크": {initialCoefficient: 24, healthCoefficient: 31, attackCoefficient: 36, defenseCoefficient: 30, agilityCoefficient: 9},
-            "마그노": {initialCoefficient: 25, healthCoefficient: 24, attackCoefficient: 32, defenseCoefficient: 18, agilityCoefficient: 29},
-            "타우루스": {initialCoefficient: 26, healthCoefficient: 36, attackCoefficient: 37, defenseCoefficient: 27, agilityCoefficient: 9},
-        // ------------26/5/14 추가끝 -----    
-        // ------------26/5/14 환생테스트 -----    
-            "바로스1환": {initialCoefficient: 43, healthCoefficient: -2, attackCoefficient: 39, defenseCoefficient: 23, agilityCoefficient: 31},
-            "바로스1환1": {initialCoefficient: 27, healthCoefficient: 5, attackCoefficient: 41, defenseCoefficient: 25, agilityCoefficient: 31},
-            "바로스1환11": {initialCoefficient: 23, healthCoefficient: 25, attackCoefficient: 37, defenseCoefficient: 21, agilityCoefficient: 31},
-            "이름없음": {initialCoefficient: 0, healthCoefficient: 0, attackCoefficient: 0, defenseCoefficient: 0, agilityCoefficient: 0},
-        };
-
-
-        // ---------------------------
-        // (3) 자동 완성 기능
-        // ---------------------------
-        const petNameInput = document.getElementById("pet-name");
-        const suggestions = document.getElementById("suggestions");
-
-        petNameInput.addEventListener("input", () => {
-    const query = petNameInput.value;  // 그대로 가져옴
-    suggestions.innerHTML = "";
-
-    // 입력이 없으면 자동완성 숨김
-    if (!query.trim()) {
-        return;
+        return result;
     }
 
-    // 입력된 값의 초성 버전
-    const queryChosung = getChosung(query);
+    let petData = {};
 
-    // petData의 모든 이름을 순회하며,
-    // "원본 이름"에 query가 포함되거나
-    // "이름의 초성"에 queryChosung이 포함되면 매칭
-    const matches = Object.keys(petData).filter((name) => {
-        const nameMatch = name.includes(query);
-        const nameChosung = getChosung(name);
-        const chosungMatch = nameChosung.includes(queryChosung);
-        return nameMatch || chosungMatch;
-    });
+    const petNameInput = document.getElementById('pet-name');
+    const suggestionsUl = document.getElementById('suggestions');
+    const rebirthSelect = document.getElementById('rebirth-type');
 
-    // 매칭된 결과를 정렬 (완벽히 일치하는 이름이 가장 위로 오도록)
-    matches.sort((a, b) => {
-        const exactMatchA = a === query ? -1 : 0;
-        const exactMatchB = b === query ? -1 : 0;
+    window.google = {
+        visualization: {
+            Query: {
+                setResponse: function (json) {
+                    try {
+                        if (!json || !json.table || !json.table.rows) {
+                            petNameInput.placeholder = "⚠️ 시트 형식 오류";
+                            return;
+                        }
 
-        // 완벽히 일치하는 이름이 가장 먼저
-        if (exactMatchA !== exactMatchB) return exactMatchA - exactMatchB;
+                        const rows = json.table.rows;
+                        let loadedCount = 0;
 
-        // 그 외의 경우, 알파벳 순서로 정렬
-        return a.localeCompare(b);
-    });
+                        for (let i = 0; i < rows.length; i++) {
+                            const rowCols = rows[i].c;
+                            if (!rowCols) continue;
+                            
+                            const getVal = (idx) => {
+                                if (!rowCols[idx]) return NaN;
+                                const v = rowCols[idx].v;
+                                const f = rowCols[idx].f;
+                                if (v !== null && v !== undefined) return Number(v);
+                                if (f !== null && f !== undefined) return Number(f.toString().replace(/,/g, ''));
+                                return NaN;
+                            };
 
-    matches.forEach((match) => {
-        const li = document.createElement("li");
-        li.textContent = match;
-        li.addEventListener("click", () => {
-            petNameInput.value = match;
-            suggestions.innerHTML = "";
-            displayIdealStats(match);
+                            let name = '';
+                            if (rowCols[0] && rowCols[0].v !== null && rowCols[0].v !== undefined) {
+                                name = String(rowCols[0].v).trim();
+                            } else if (rowCols[0] && rowCols[0].f !== null && rowCols[0].f !== undefined) {
+                                name = String(rowCols[0].f).trim();
+                            }
+
+                            if (!name || name === "이름" || name === "페트명" || name.includes("계수")) continue;
+
+                            const initC = getVal(1);
+                            const hpC   = getVal(2);
+                            const atkC  = getVal(3);
+                            const defC  = getVal(4);
+                            const agiC  = getVal(5);
+
+                            if (!isNaN(initC) && !isNaN(hpC)) {
+                                petData[name] = {
+                                    initialCoefficient: initC,
+                                    healthCoefficient: hpC,
+                                    attackCoefficient: atkC,
+                                    defenseCoefficient: defC,
+                                    agilityCoefficient: agiC
+                                };
+                                loadedCount++;
+                            }
+                        }
+
+                        if (loadedCount > 0) {
+                            petNameInput.placeholder = "이름을 입력하면 자동 로드됩니다.";
+                            petNameInput.disabled = false;
+                        } else {
+                            petNameInput.placeholder = "⚠️ 시트 데이터 읽기 실패";
+                        }
+                    } catch (e) {
+                        console.error("DB Load Error", e);
+                        petNameInput.placeholder = "⚠️ DB 연결 에러";
+                    }
+                }
+            }
+        }
+    };
+
+    function setInputsLock(isLock) {
+        const targetIds = [
+            'base-hp', 'base-atk', 'base-def', 'base-agi',
+            'base-g-hp', 'base-g-atk', 'base-g-def', 'base-g-agi'
+        ];
+        targetIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (isLock) el.setAttribute('readonly', true);
+            else el.removeAttribute('readonly');
         });
-        suggestions.appendChild(li);
+    }
+
+    function clearInputs() {
+        const targetIds = [
+            'base-hp', 'base-atk', 'base-def', 'base-agi',
+            'base-g-hp', 'base-g-atk', 'base-g-def', 'base-g-agi',
+            'my-hp', 'my-atk', 'my-def', 'my-agi'
+        ];
+        targetIds.forEach(id => { document.getElementById(id).value = ""; });
+    }
+
+    function clearRebirthInputs() {
+        const targetIds = ['r-base-hp', 'r-base-atk', 'r-base-def', 'r-base-agi', 'r-base-g-hp', 'r-base-g-atk', 'r-base-g-def', 'r-base-g-agi'];
+        targetIds.forEach(id => { document.getElementById(id).value = ""; });
+    }
+
+    function checkAndApplyState() {
+        const nameValue = petNameInput.value.trim();
+        if (nameValue && petData[nameValue]) {
+            applyPetStats(nameValue);
+        } else {
+            setInputsLock(false);
+            if(!nameValue) {
+                clearInputs();
+                clearRebirthInputs();
+                document.getElementById('rebirth-info-section').style.display = 'none';
+            } else {
+                clearInputs();
+                clearRebirthInputs();
+                updateRebirthStats();
+            }
+        }
+    }
+
+    petNameInput.addEventListener('input', function() {
+        const value = this.value.trim();
+        suggestionsUl.innerHTML = '';
+
+        if (!value) {
+            suggestionsUl.style.display = 'none';
+            setInputsLock(false);
+            clearInputs();
+            clearRebirthInputs();
+            document.getElementById('rebirth-info-section').style.display = 'none';
+            return;
+        }
+
+        const matches = Object.keys(petData).filter(name => name.includes(value));
+
+        if (matches.length > 0) {
+            matches.forEach(match => {
+                const li = document.createElement('li');
+                li.innerText = match;
+                li.addEventListener('click', function() {
+                    petNameInput.value = match;
+                    suggestionsUl.style.display = 'none';
+                    checkAndApplyState(); 
+                });
+                suggestionsUl.appendChild(li);
+            });
+            suggestionsUl.style.display = 'block';
+        } else {
+            suggestionsUl.style.display = 'none';
+        }
+        checkAndApplyState();
     });
-});
 
+    rebirthSelect.addEventListener('change', function() {
+        updateRebirthStats();
+    });
 
-        // ---------------------------
-        // (4) "정석페트" 예시 값 표시
-        // ---------------------------
-        function displayIdealStats(petName) {
-            if (petData[petName]) {
-                const idealStats = calculateIdealStats(petData[petName]);
-                document.getElementById("display-health").value = idealStats.displayHealth;
-                document.getElementById("display-attack").value = idealStats.displayAttack;
-                document.getElementById("display-defense").value = idealStats.displayDefense;
-                document.getElementById("display-agility").value = idealStats.displayAgility;
+    const baseInputIds = ['base-hp', 'base-atk', 'base-def', 'base-agi', 'base-g-hp', 'base-g-atk', 'base-g-def', 'base-g-agi'];
+    baseInputIds.forEach(id => {
+        document.getElementById(id).addEventListener('input', updateRebirthStats);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target !== petNameInput) suggestionsUl.style.display = 'none';
+    });
+
+    function applyPetStats(name) {
+        const data = petData[name];
+        if (!data) return;
+
+        setInputsLock(true);
+        const initC = data.initialCoefficient;
+        
+        const hpC = data.healthCoefficient;
+        const atkC = data.attackCoefficient;
+        const defC = data.defenseCoefficient;
+        const agiC = data.agilityCoefficient;
+
+        const initialAgilityRaw = ((agiC + 4.5) * initC) / 100;
+        const initialHealthRaw = ((hpC + 4.5) * initC) / 100;
+        const initialAttackRaw = ((atkC + 4.5) * initC) / 100;
+        const initialDefenseRaw = ((defC + 4.5) * initC) / 100;
+
+        const finalHp = Math.floor(initialHealthRaw * 4 + initialAttackRaw + initialDefenseRaw + initialAgilityRaw);
+        const finalAtk = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw + initialDefenseRaw * 0.1 + initialAgilityRaw * 0.05);
+        const finalDef = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw * 0.1 + initialDefenseRaw + initialAgilityRaw * 0.05);
+        const finalAgi = Math.floor(initialAgilityRaw);
+
+        document.getElementById('base-hp').value = finalHp;
+        document.getElementById('base-atk').value = finalAtk;
+        document.getElementById('base-def').value = finalDef;
+        document.getElementById('base-agi').value = finalAgi;
+
+        // 편의기능: 내 펫의 1렙 표기 스탯에 노환 베이스 S급 1렙 초기치를 자동 입력
+        document.getElementById('my-hp').value = finalHp;
+        document.getElementById('my-atk').value = finalAtk;
+        document.getElementById('my-def').value = finalDef;
+        document.getElementById('my-agi').value = finalAgi;
+
+        const sumC = hpC + atkC + defC + agiC;
+        const bAvg = sumC >= 100 ? 475 : sumC >= 95 ? 495 : sumC >= 90 ? 515 : sumC >= 85 ? 535 : sumC >= 80 ? 555 : 575;
+
+        const gAgi_raw = (agiC + 4.5) * bAvg / 10000;
+        const gDef_raw = (defC + 4.5) * bAvg / 10000;
+        const gAtk_raw = (atkC + 4.5) * bAvg / 10000;
+        const gHp_raw = (hpC + 4.5) * bAvg / 10000;
+
+        const cgAgi = gAgi_raw;
+        const cgDef = gHp_raw * 0.1 + gAtk_raw * 0.1 + gDef_raw + gAgi_raw * 0.05;
+        const cgAtk = gHp_raw * 0.1 + gAtk_raw + gDef_raw * 0.1 + gAgi_raw * 0.05;
+        const cgHp = gHp_raw * 4 + gAtk_raw + gDef_raw + gAgi_raw;
+
+        document.getElementById('base-g-hp').value = cgHp.toFixed(3);
+        document.getElementById('base-g-atk').value = cgAtk.toFixed(3);
+        document.getElementById('base-g-def').value = cgDef.toFixed(3);
+        document.getElementById('base-g-agi').value = cgAgi.toFixed(3);
+
+        updateRebirthStats();
+    }
+
+    function updateRebirthStats() {
+        const rVal = rebirthSelect.value;
+        const infoSection = document.getElementById('rebirth-info-section');
+        const petName = petNameInput.value.trim();
+
+        if (rVal === "none") {
+            infoSection.style.display = 'none';
+            // 노환으로 변경 시 내 펫 1렙 스탯을 노환 S급 수치로 자동 변경
+            const baseHp = document.getElementById('base-hp').value;
+            if (baseHp) {
+                document.getElementById('my-hp').value = baseHp;
+                document.getElementById('my-atk').value = document.getElementById('base-atk').value;
+                document.getElementById('my-def').value = document.getElementById('base-def').value;
+                document.getElementById('my-agi').value = document.getElementById('base-agi').value;
             }
+            return;
         }
 
-        // ---------------------------
-        // (5) "정석페트" 계산 (정수 기반)
-        // ---------------------------
-        function calculateIdealStats(pet) {
-            const baseHealth = pet.healthCoefficient + 2 + 2.5;
-            const baseAttack = pet.attackCoefficient + 2 + 2.5;
-            const baseDefense = pet.defenseCoefficient + 2 + 2.5;
-            const baseAgility = pet.agilityCoefficient + 2 + 2.5;
+        const displays = document.querySelectorAll('.rebirth-text-display');
+        displays.forEach(el => el.innerText = rVal === "1" ? "1환" : "2환");
+        infoSection.style.display = 'grid';
 
-            const initialHealth = (baseHealth * pet.initialCoefficient) / 100;
-            const initialAttack = (baseAttack * pet.initialCoefficient) / 100;
-            const initialDefense = (baseDefense * pet.initialCoefficient) / 100;
-            const initialAgility = (baseAgility * pet.initialCoefficient) / 100;
+        const baseHp = Number(document.getElementById('base-hp').value);
+        const baseAtk = Number(document.getElementById('base-atk').value);
+        const baseDef = Number(document.getElementById('base-def').value);
+        const baseAgi = Number(document.getElementById('base-agi').value);
+        const gHp = Number(document.getElementById('base-g-hp').value);
+        const gAtk = Number(document.getElementById('base-g-atk').value);
+        const gDef = Number(document.getElementById('base-g-def').value);
+        const gAgi = Number(document.getElementById('base-g-agi').value);
 
-            return {
-                displayHealth: Math.floor(initialHealth * 4 + initialAttack + initialDefense + initialAgility),
-                displayAttack: Math.floor(initialHealth * 0.1 + initialAttack + initialDefense * 0.1 + initialAgility * 0.05),
-                displayDefense: Math.floor(initialHealth * 0.1 + initialAttack * 0.1 + initialDefense + initialAgility * 0.05),
-                displayAgility: Math.floor(initialAgility),
-            };
+        if (!baseHp || !baseAtk || !baseDef || !baseAgi || !gHp || !gAtk || !gDef || !gAgi) {
+            clearRebirthInputs();
+            return;
         }
 
-        // ---------------------------
-        // (6) "확률 계산" 버튼 클릭
-        // ---------------------------
-        document.getElementById("calculate-btn").addEventListener("click", () => {
-            // 로딩 화면 표시
-            document.getElementById("loading").style.display = "block";
+        let coefs = null;
+        if (petName && petData[petName]) {
+            const p = petData[petName];
+            coefs = { initC: p.initialCoefficient, hpC: p.healthCoefficient, atkC: p.attackCoefficient, defC: p.defenseCoefficient, agiC: p.agilityCoefficient };
+        } else {
+            coefs = bruteForceCoefficients(baseHp, baseAtk, baseDef, baseAgi, gHp, gAtk, gDef, gAgi);
+        }
 
-            const petName = petNameInput.value;
-            const displayHealth = parseInt(document.getElementById("display-health").value, 10);
-            const displayAttack = parseInt(document.getElementById("display-attack").value, 10);
-            const displayDefense = parseInt(document.getElementById("display-defense").value, 10);
-            const displayAgility = parseInt(document.getElementById("display-agility").value, 10);
+        if (!coefs) {
+            clearRebirthInputs();
+            return;
+        }
 
-            if (
-                !petName ||
-                !petData[petName] ||
-                isNaN(displayHealth) ||
-                isNaN(displayAttack) ||
-                isNaN(displayDefense) ||
-                isNaN(displayAgility)
-            ) {
-                document.getElementById("result").textContent = "빈 칸이 있습니다 !";
-                document.getElementById("loading").style.display = "none";
-                return;
+        // 💡 수정 완료: 바우트 실측 기반 능력치별 정밀 분리 환생 보정 상수 대입
+        let hpBonus = 0, atkBonus = 0, defBonus = 0, agiBonus = 0;
+        if (rVal === "1") {
+            hpBonus = 2; atkBonus = 4; defBonus = 4; agiBonus = 2;
+        } else if (rVal === "2") {
+            hpBonus = 8; atkBonus = 13; defBonus = 13; agiBonus = 8;
+        }
+
+        const hpC = coefs.hpC + hpBonus;
+        const atkC = coefs.atkC + atkBonus;
+        const defC = coefs.defC + defBonus;
+        const agiC = coefs.agiC + agiBonus;
+        const initC = coefs.initC; // 초기치 계수 보너스 없음 (+0)
+
+        const initialAgilityRaw = ((agiC + 4.5) * initC) / 100;
+        const initialHealthRaw = ((hpC + 4.5) * initC) / 100;
+        const initialAttackRaw = ((atkC + 4.5) * initC) / 100;
+        const initialDefenseRaw = ((defC + 4.5) * initC) / 100;
+
+        const finalHp = Math.floor(initialHealthRaw * 4 + initialAttackRaw + initialDefenseRaw + initialAgilityRaw);
+        const finalAtk = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw + initialDefenseRaw * 0.1 + initialAgilityRaw * 0.05);
+        const finalDef = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw * 0.1 + initialDefenseRaw + initialAgilityRaw * 0.05);
+        const finalAgi = Math.floor(initialAgilityRaw);
+
+        document.getElementById('r-base-hp').value = finalHp;
+        document.getElementById('r-base-atk').value = finalAtk;
+        document.getElementById('r-base-def').value = finalDef;
+        document.getElementById('r-base-agi').value = finalAgi;
+
+        // 환생을 선택하면 내 펫의 1렙 표기 스탯에도 해당 환생의 S급 초기치를 자동 기입
+        document.getElementById('my-hp').value = finalHp;
+        document.getElementById('my-atk').value = finalAtk;
+        document.getElementById('my-def').value = finalDef;
+        document.getElementById('my-agi').value = finalAgi;
+
+        // 💡 수정 완료: bAvg 계산 시 환생 상태에 무관하게 항상 '순수 노환 계수의 합산'으로 랭크 결정 고정
+        const sumC = coefs.hpC + coefs.atkC + coefs.defC + coefs.agiC;
+        const bAvg = sumC >= 100 ? 475 : sumC >= 95 ? 495 : sumC >= 90 ? 515 : sumC >= 85 ? 535 : sumC >= 80 ? 555 : 575;
+
+        const gAgi_raw = (agiC + 4.5) * bAvg / 10000;
+        const gDef_raw = (defC + 4.5) * bAvg / 10000;
+        const gAtk_raw = (atkC + 4.5) * bAvg / 10000;
+        const gHp_raw = (hpC + 4.5) * bAvg / 10000;
+
+        const cgAgi = gAgi_raw;
+        const cgDef = gHp_raw * 0.1 + gAtk_raw * 0.1 + gDef_raw + gAgi_raw * 0.05;
+        const cgAtk = gHp_raw * 0.1 + gAtk_raw + gDef_raw * 0.1 + gAgi_raw * 0.05;
+        const cgHp = gHp_raw * 4 + gAtk_raw + gDef_raw + gAgi_raw;
+
+        document.getElementById('r-base-g-hp').value = cgHp.toFixed(3);
+        document.getElementById('r-base-g-atk').value = cgAtk.toFixed(3);
+        document.getElementById('r-base-g-def').value = cgDef.toFixed(3);
+        document.getElementById('r-base-g-agi').value = cgAgi.toFixed(3);
+    }
+
+    function bruteForceCoefficients(baseHp, baseAtk, baseDef, baseAgi, baseGHp, baseGAtk, baseGDef, baseGAgi) {
+        let foundCandidates = [];
+        for (let initC = 10; initC <= 60; initC++) {
+            for (let agiC = 0; agiC <= 75; agiC++) {
+                let initialAgilityRaw = ((agiC + 4.5) * initC) / 100;
+                if (Math.floor(initialAgilityRaw) !== baseAgi) continue;
+
+                for (let hpC = 0; hpC <= 75; hpC++) {
+                    let initialHealthRaw = ((hpC + 4.5) * initC) / 100;
+                    if (initialHealthRaw * 4 > baseHp) continue; 
+
+                    for (let atkC = 0; atkC <= 75; atkC++) {
+                        let initialAttackRaw = ((atkC + 4.5) * initC) / 100;
+                        if (initialAttackRaw > baseAtk) continue; 
+
+                        for (let defC = 0; defC <= 75; defC++) {
+                            let initialDefenseRaw = ((defC + 4.5) * initC) / 100;
+                            if (initialDefenseRaw > baseDef) continue; 
+
+                            let cHp = Math.floor(initialHealthRaw * 4 + initialAttackRaw + initialDefenseRaw + initialAgilityRaw);
+                            if (cHp !== baseHp) continue;
+
+                            let cAtk = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw + initialDefenseRaw * 0.1 + initialAgilityRaw * 0.05);
+                            if (cAtk !== baseAtk) continue;
+
+                            let cDef = Math.floor(initialHealthRaw * 0.1 + initialAttackRaw * 0.1 + initialDefenseRaw + initialAgilityRaw * 0.05);
+                            if (cDef !== baseDef) continue;
+
+                            let sumC = hpC + atkC + defC + agiC;
+                            let bAvg = sumC >= 100 ? 475 : sumC >= 95 ? 495 : sumC >= 90 ? 515 : sumC >= 85 ? 535 : sumC >= 80 ? 555 : 575;
+
+                            let gAgi_raw = (agiC + 4.5) * bAvg / 10000;
+                            let gDef_raw = (defC + 4.5) * bAvg / 10000;
+                            let gAtk_raw = (atkC + 4.5) * bAvg / 10000;
+                            let gHp_raw = (hpC + 4.5) * bAvg / 10000;
+
+                            let cgAgi = gAgi_raw;
+                            let cgDef = gHp_raw * 0.1 + gAtk_raw * 0.1 + gDef_raw + gAgi_raw * 0.05;
+                            let cgAtk = gHp_raw * 0.1 + gAtk_raw + gDef_raw * 0.1 + gAgi_raw * 0.05;
+                            let cgHp = gHp_raw * 4 + gAtk_raw + gDef_raw + gAgi_raw;
+
+                            if (Math.abs(cgAgi - baseGAgi) > 0.008) continue;
+                            if (Math.abs(cgDef - baseGDef) > 0.008) continue;
+                            if (Math.abs(cgAtk - baseGAtk) > 0.008) continue;
+                            if (Math.abs(cgHp - baseGHp) > 0.008) continue;
+
+                            foundCandidates.push({ initC, hpC, atkC, defC, agiC });
+                        }
+                    }
+                }
+            }
+        }
+        return foundCandidates.length > 0 ? foundCandidates[0] : null;
+    }
+
+    function formatPercentage(num) {
+        if (num === 0) return "0.0%";
+        let str = num.toFixed(20);
+        let decimalIndex = str.indexOf('.');
+        if (decimalIndex === -1) return str + '.0%';
+        let decimals = str.substring(decimalIndex + 1);
+        let firstNonZero = decimals.search(/[1-9]/);
+        if (firstNonZero === -1) return "0.0%";
+        let significantDigit = decimals[firstNonZero];
+        let nextDigit = parseInt(decimals[firstNonZero + 1]) || 0;
+        if (nextDigit >= 5) {
+            significantDigit = (parseInt(significantDigit) + 1).toString();
+        }
+        return str.substring(0, decimalIndex + 1 + firstNonZero) + significantDigit + '%';
+    }
+
+    document.getElementById('btn-calc').addEventListener('click', () => {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result-box').style.display = 'none';
+
+        setTimeout(() => {
+            const petName = document.getElementById('pet-name').value.trim();
+            const rebirthValue = rebirthSelect.value;
+            const rebirthText = rebirthSelect.options[rebirthSelect.selectedIndex].text;
+            
+            document.getElementById('r-pet-display').innerText = petName ? `[${petName} / ${rebirthText}]` : `[${rebirthText}]`;
+
+            let baseHp, baseAtk, baseDef, baseAgi, gHp, gAtk, gDef, gAgi;
+            if (rebirthValue === "none") {
+                baseHp = Number(document.getElementById('base-hp').value);
+                baseAtk = Number(document.getElementById('base-atk').value);
+                baseDef = Number(document.getElementById('base-def').value);
+                baseAgi = Number(document.getElementById('base-agi').value);
+                gHp = Number(document.getElementById('base-g-hp').value);
+                gAtk = Number(document.getElementById('base-g-atk').value);
+                gDef = Number(document.getElementById('base-g-def').value);
+                gAgi = Number(document.getElementById('base-g-agi').value);
+            } else {
+                baseHp = Number(document.getElementById('r-base-hp').value);
+                baseAtk = Number(document.getElementById('r-base-atk').value);
+                baseDef = Number(document.getElementById('r-base-def').value);
+                baseAgi = Number(document.getElementById('r-base-agi').value);
+                gHp = Number(document.getElementById('r-base-g-hp').value);
+                gAtk = Number(document.getElementById('r-base-g-atk').value);
+                gDef = Number(document.getElementById('r-base-g-def').value);
+                gAgi = Number(document.getElementById('r-base-g-agi').value);
             }
 
-            const pet = petData[petName];
-            const totalCases = [];
-            let hallucinationCases = 0;
+            const myHp = Number(document.getElementById('my-hp').value);
+            const myAtk = Number(document.getElementById('my-atk').value);
+            const myDef = Number(document.getElementById('my-def').value);
+            const myAgi = Number(document.getElementById('my-agi').value);
 
-            // 가능한 모든 스탯 조합(-2 ~ 2, 보너스 0 ~ 10) 탐색
-            for (let healthRandom = -2; healthRandom <= 2; healthRandom++) {
-                for (let attackRandom = -2; attackRandom <= 2; attackRandom++) {
-                    for (let defenseRandom = -2; defenseRandom <= 2; defenseRandom++) {
-                        for (let agilityRandom = -2; agilityRandom <= 2; agilityRandom++) {
-                            for (let healthBonus = 0; healthBonus <= 10; healthBonus++) {
-                                for (let attackBonus = 0; attackBonus <= 10; attackBonus++) {
-                                    for (let defenseBonus = 0; defenseBonus <= 10; defenseBonus++) {
-                                        const agilityBonus = 10 - healthBonus - attackBonus - defenseBonus;
-                                        if (agilityBonus < 0 || agilityBonus > 10) continue;
+            const bAtk = Number(document.getElementById('b-atk').value);
+            const bDef = Number(document.getElementById('b-def').value);
+            const bAgi = Number(document.getElementById('b-agi').value);
+            const bHp = Number(document.getElementById('b-hp').value);
 
-                                        const baseHealth = pet.healthCoefficient + healthRandom + healthBonus;
-                                        const baseAttack = pet.attackCoefficient + attackRandom + attackBonus;
-                                        const baseDefense = pet.defenseCoefficient + defenseRandom + defenseBonus;
-                                        const baseAgility = pet.agilityCoefficient + agilityRandom + agilityBonus;
+            // 💡 표기 스탯에서 보정치를 뺀 '순수 스탯'을 사전 정의하여, 시뮬레이션 매칭 시 동일한 기준으로 판단하게 합니다.
+            const netHp = myHp - bHp;
+            const netAtk = myAtk - bAtk;
+            const netDef = myDef - bDef;
+            const netAgi = myAgi - bAgi;
 
-                                        const initialHealth = (baseHealth * pet.initialCoefficient) / 100;
-                                        const initialAttack = (baseAttack * pet.initialCoefficient) / 100;
-                                        const initialDefense = (baseDefense * pet.initialCoefficient) / 100;
-                                        const initialAgility = (baseAgility * pet.initialCoefficient) / 100;
+            const isDbPet = !!(petName && petData[petName]);
 
-                                        const calcHealth = Math.floor(initialHealth * 4 + initialAttack + initialDefense + initialAgility);
-                                        const calcAttack = Math.floor(initialHealth * 0.1 + initialAttack + initialDefense * 0.1 + initialAgility * 0.05);
-                                        const calcDefense = Math.floor(initialHealth * 0.1 + initialAttack * 0.1 + initialDefense + initialAgility * 0.05);
-                                        const calcAgility = Math.floor(initialAgility);
+            let coefs = null;
+            if (isDbPet) {
+                const p = petData[petName];
+                let hpBonus = 0, atkBonus = 0, defBonus = 0, agiBonus = 0;
+                if (rebirthValue === "1") {
+                    hpBonus = 2; atkBonus = 4; defBonus = 4; agiBonus = 2;
+                } else if (rebirthValue === "2") {
+                    hpBonus = 8; atkBonus = 13; defBonus = 13; agiBonus = 8;
+                }
 
-                                        if (
-                                            calcHealth === displayHealth &&
-                                            calcAttack === displayAttack &&
-                                            calcDefense === displayDefense &&
-                                            calcAgility === displayAgility
-                                        ) {
-                                            totalCases.push({ healthRandom, attackRandom, defenseRandom, agilityRandom });
+                coefs = {
+                    initC: p.initialCoefficient,
+                    hpC: p.healthCoefficient + hpBonus,
+                    atkC: p.attackCoefficient + atkBonus,
+                    defC: p.defenseCoefficient + defBonus,
+                    agiC: p.agilityCoefficient + agiBonus
+                };
+            } else {
+                coefs = bruteForceCoefficients(
+                    Number(document.getElementById('base-hp').value), 
+                    Number(document.getElementById('base-atk').value), 
+                    Number(document.getElementById('base-def').value), 
+                    Number(document.getElementById('base-agi').value), 
+                    Number(document.getElementById('base-g-hp').value), 
+                    Number(document.getElementById('base-g-atk').value), 
+                    Number(document.getElementById('base-g-def').value), 
+                    Number(document.getElementById('base-g-agi').value)
+                );
+                
+                if (coefs && petName) {
+                    petData[petName] = {
+                        initialCoefficient: coefs.initC,
+                        healthCoefficient: coefs.hpC,
+                        attackCoefficient: coefs.atkC,
+                        defenseCoefficient: coefs.defC,
+                        agilityCoefficient: coefs.agiC
+                    };
+                    
+                    const fetchUrl = `${WEB_APP_URL}?name=${encodeURIComponent(petName)}&initC=${coefs.initC}&hpC=${coefs.hpC}&atkC=${coefs.atkC}&defC=${coefs.defC}&agiC=${coefs.agiC}`;
+                    fetch(fetchUrl, { mode: 'no-cors' }).then(() => console.log('새 펫 DB 등록 완료')).catch(e => console.warn(e));
 
-                                            // 환수(+2, +2, +2, +2) 조건
-                                            if (healthRandom === 2 && attackRandom === 2 && defenseRandom === 2 && agilityRandom === 2) {
-                                                hallucinationCases++;
+                    let hpBonus = 0, atkBonus = 0, defBonus = 0, agiBonus = 0;
+                    if (rebirthValue === "1") {
+                        hpBonus = 2; atkBonus = 4; defBonus = 4; agiBonus = 2;
+                    } else if (rebirthValue === "2") {
+                        hpBonus = 8; atkBonus = 13; defBonus = 13; agiBonus = 8;
+                    }
+                    coefs.hpC += hpBonus;
+                    coefs.atkC += atkBonus;
+                    coefs.defC += defBonus;
+                    coefs.agiC += agiBonus;
+                }
+            }
+
+            let statusMsg = "";
+            const wrapper = document.getElementById('probability-wrapper');
+
+            if (!coefs && !isDbPet) {
+                wrapper.innerHTML = `<div class="error-highlight">안잡히는 초기치일걸요~</div>`;
+                statusMsg = "<span style='color:#e74c3c;'>분석 실패: 유효하지 않은 스탯 조합입니다.</span>";
+            } else {
+                statusMsg = "<span style='color:#27ae60;'>성공!</span>";
+
+                let exactMatchCount = 0;
+                let totalPossibleCases = 0;
+                let hallucinationCases = 0;
+
+                for (let healthRandom = -2; healthRandom <= 2; healthRandom++) {
+                    for (let attackRandom = -2; attackRandom <= 2; attackRandom++) {
+                        for (let defenseRandom = -2; defenseRandom <= 2; defenseRandom++) {
+                            for (let agilityRandom = -2; agilityRandom <= 2; agilityRandom++) {
+                                
+                                for (let healthBonus = 0; healthBonus <= 10; healthBonus++) {
+                                    for (let attackBonus = 0; attackBonus <= (10 - healthBonus); attackBonus++) {
+                                        for (let defenseBonus = 0; defenseBonus <= (10 - healthBonus - attackBonus); defenseBonus++) {
+                                            
+                                            const agilityBonus = 10 - healthBonus - attackBonus - defenseBonus;
+
+                                            // 순수 유전 계수 베이스 연산
+                                            const baseAttack = coefs.atkC + attackRandom + attackBonus;
+                                            const baseDefense = coefs.defC + defenseRandom + defenseBonus;
+                                            const baseAgility = coefs.agiC + agilityRandom + agilityBonus;
+                                            const baseHealth = coefs.hpC + healthRandom + healthBonus;
+
+                                            // 순수 계수 연산 (보정치 개입 없음)
+                                            const initialHealth = (baseHealth * coefs.initC) / 100;
+                                            const initialAttack = (baseAttack * coefs.initC) / 100;
+                                            const initialDefense = (baseDefense * coefs.initC) / 100;
+                                            const initialAgility = (baseAgility * coefs.initC) / 100;
+
+                                            const calcHealth = Math.floor(initialHealth * 4 + initialAttack + initialDefense + initialAgility);
+                                            const calcAttack = Math.floor(initialHealth * 0.1 + initialAttack + initialDefense * 0.1 + initialAgility * 0.05);
+                                            const calcDefense = Math.floor(initialHealth * 0.1 + initialAttack * 0.1 + initialDefense + initialAgility * 0.05);
+                                            const calcAgility = Math.floor(initialAgility);
+
+                                            totalPossibleCases++;
+
+                                            // 시뮬레이션된 '순수 계산값'을, 보정치가 제거된 내 펫의 '순수 스탯(netHp 등)'과 완벽하게 1:1 비교합니다.
+                                            if (calcHealth === netHp && calcAttack === netAtk && calcDefense === netDef && calcAgility === netAgi) {
+                                                exactMatchCount++;
+                                                
+                                                // 보정치 유무에 상관없이, 순수 랜덤 능력치가 최고 수치(2)로 떴을 때만 S급 성공으로 판정
+                                                const isAtkSuccess = (attackRandom === 2);
+                                                const isDefSuccess = (defenseRandom === 2);
+                                                const isAgiSuccess = (agilityRandom === 2);
+                                                const isHpSuccess  = (healthRandom === 2);
+
+                                                if (isAtkSuccess && isDefSuccess && isAgiSuccess && isHpSuccess) {
+                                                    hallucinationCases++;
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                
                             }
                         }
                     }
                 }
-            }
 
-            // 결과
-            const totalMatchedCases = totalCases.length;
-            if (totalMatchedCases === 0) {
-                document.getElementById("result").textContent = "다른 값으로 시도해 보세요! 아마 안잡히는 스탯일걸요 !?";
-            } else {
-const probability = ((hallucinationCases / totalMatchedCases) * 100).toFixed(2);
-const displayProbability = probability === "100.00" ? "99.9" : probability; // 100%면 99.9%로 변경
-document.getElementById("result").innerHTML =
-    `성공 확률 : <strong>${displayProbability}%</strong>`;
-            }
+                if (exactMatchCount === 0 && !isDbPet) {
+                    wrapper.innerHTML = `<div class="error-highlight">안잡히는 초기치일걸요~</div>`;
+                } else {
+                    if(exactMatchCount === 0) exactMatchCount = 1; 
 
-            document.getElementById("loading").style.display = "none";
-        });
+                    let finalProbability = (hallucinationCases / exactMatchCount) * 100;
+                    if (finalProbability > 100) finalProbability = 100;
+                    
+                    const displayProbability = finalProbability.toFixed(2);
+                    const probDec = finalProbability / 100;
+                    const expectedAttempts = probDec > 0 ? (1 / probDec).toFixed(2) : "ㅠㅠ";
 
-    // ---------------------------
-    // (7) 입력한 정수 단위 표기 스탯의 발생 확률 계산 기능 추가
-    // ---------------------------
-    document.getElementById("calculate-btn").addEventListener("click", () => {
-        // 기존 계산 로직이 완료된 후 실행되도록 setTimeout을 사용하여 비동기로 처리
-        setTimeout(() => {
-            // 사용자 입력된 스탯 가져오기
-            const displayHealth = parseInt(document.getElementById("display-health").value, 10);
-            const displayAttack = parseInt(document.getElementById("display-attack").value, 10);
-            const displayDefense = parseInt(document.getElementById("display-defense").value, 10);
-            const displayAgility = parseInt(document.getElementById("display-agility").value, 10);
-            const petName = document.getElementById("pet-name").value.trim();
+                    const hasBonus = (bAtk > 0 || bDef > 0 || bAgi > 0 || bHp > 0);
+                    const isRebirth = (rebirthValue === "1" || rebirthValue === "2");
 
-            // 유효한 페트 이름인지 확인
-            if (!petData.hasOwnProperty(petName)) {
-                // 유효하지 않다면 추가 계산을 하지 않음
-                return;
-            }
-
-            const pet = petData[petName];
-
-            let exactMatchCount = 0;
-            let totalPossibleCases = 0;
-
-            // 가능한 모든 스탯 조합(-2 ~ 2, 보너스 0 ~ 10)
-            for (let healthRandom = -2; healthRandom <= 2; healthRandom++) {
-                for (let attackRandom = -2; attackRandom <= 2; attackRandom++) {
-                    for (let defenseRandom = -2; defenseRandom <= 2; defenseRandom++) {
-                        for (let agilityRandom = -2; agilityRandom <= 2; agilityRandom++) {
-                            for (let healthBonus = 0; healthBonus <= 10; healthBonus++) {
-                                for (let attackBonus = 0; attackBonus <= 10; attackBonus++) {
-                                    for (let defenseBonus = 0; defenseBonus <= 10; defenseBonus++) {
-                                        const agilityBonus = 10 - healthBonus - attackBonus - defenseBonus;
-                                        if (agilityBonus < 0 || agilityBonus > 10) continue;
-
-                                        const baseHealth = pet.healthCoefficient + healthRandom + healthBonus;
-                                        const baseAttack = pet.attackCoefficient + attackRandom + attackBonus;
-                                        const baseDefense = pet.defenseCoefficient + defenseRandom + defenseBonus;
-                                        const baseAgility = pet.agilityCoefficient + agilityRandom + agilityBonus;
-
-                                        const initialHealth = (baseHealth * pet.initialCoefficient) / 100;
-                                        const initialAttack = (baseAttack * pet.initialCoefficient) / 100;
-                                        const initialDefense = (baseDefense * pet.initialCoefficient) / 100;
-                                        const initialAgility = (baseAgility * pet.initialCoefficient) / 100;
-
-                                        const calcHealth = Math.floor(initialHealth * 4 + initialAttack + initialDefense + initialAgility);
-                                        const calcAttack = Math.floor(initialHealth * 0.1 + initialAttack + initialDefense * 0.1 + initialAgility * 0.05);
-                                        const calcDefense = Math.floor(initialHealth * 0.1 + initialAttack * 0.1 + initialDefense + initialAgility * 0.05);
-                                        const calcAgility = Math.floor(initialAgility);
-
-                                        totalPossibleCases++;
-
-                                        if (
-                                            calcHealth === displayHealth &&
-                                            calcAttack === displayAttack &&
-                                            calcDefense === displayDefense &&
-                                            calcAgility === displayAgility
-                                        ) {
-                                            exactMatchCount++;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 퍼센트 계산 (소수점 첫 번째 비-zero 자릿수까지 반올림)
-            const percentage = totalPossibleCases > 0 ? ((exactMatchCount / totalPossibleCases) * 100) : 0.0;
-
-            // 퍼센트 포맷팅: 소수점 첫 번째 비-zero 자릿수까지 표시하고 그 다음 자리는 반올림
-            function formatPercentage(num) {
-                if (num === 0) return "0.0%";
-
-                // 소수점 이하 최대 20자리까지 고정
-                let str = num.toFixed(20);
-                let decimalIndex = str.indexOf('.');
-                if (decimalIndex === -1) return str + '.0%';
-
-                let decimals = str.substring(decimalIndex + 1);
-                let firstNonZero = decimals.search(/[1-9]/);
-                if (firstNonZero === -1) return "0.0%";
-
-                // 첫 번째 비-zero 자릿수
-                let significantDigit = decimals[firstNonZero];
-                let nextDigit = parseInt(decimals[firstNonZero + 1]) || 0;
-
-                // 다음 자리가 5 이상이면 반올림
-                if (nextDigit >= 5) {
-                    significantDigit = (parseInt(significantDigit) + 1).toString();
-                    // 만약 significantDigit가 10이 되면, 해당 자리를 0으로 만들고 앞자리 올림 처리
-                    if (significantDigit === '10') {
-                        // 자릿수를 올려야 함
-                        let roundedStr = str.substring(0, decimalIndex + 1 + firstNonZero);
-                        let carryIndex = roundedStr.length - 1;
-
-                        while (carryIndex >= 0) {
-                            if (roundedStr[carryIndex] === '.') {
-                                carryIndex--;
-                                continue;
-                            }
-                            if (roundedStr[carryIndex] === '9') {
-                                roundedStr = roundedStr.substring(0, carryIndex) + '0' + roundedStr.substring(carryIndex + 1);
-                                carryIndex--;
-                            } else {
-                                let incremented = (parseInt(roundedStr[carryIndex]) + 1).toString();
-                                roundedStr = roundedStr.substring(0, carryIndex) + incremented + roundedStr.substring(carryIndex + 1);
-                                break;
-                            }
-                        }
-
-                        // 만약 모든 자리가 9였다면
-                        if (carryIndex < 0) {
-                            roundedStr = '1' + roundedStr;
-                        }
-
-                        return roundedStr + '%';
-                    }
-                }
-
-                // 소수점 첫 번째 비-zero 자릿수까지 유지하고 그 다음 자리는 반올림 처리
-                let formatted = str.substring(0, decimalIndex + 1 + firstNonZero) + significantDigit + '%';
-                return formatted;
-            }
-
-            const formattedPercentage = formatPercentage(percentage);
-
-            // 결과 창에 퍼센트 추가
-            const resultElement = document.getElementById("result");
-            let percentageResult = document.getElementById("exact-percentage-result");
-
-            if (!percentageResult) {
-                // 퍼센트 결과가 없으면 새로 생성
-                percentageResult = document.createElement("div");
-                percentageResult.id = "exact-percentage-result";
-                percentageResult.style.marginTop = "10px"; // 약간의 여백 추가
-                percentageResult.innerHTML = `출현 확률 : <strong>${formattedPercentage}</strong>`;
-                resultElement.appendChild(percentageResult);
-            } else {
-                // 이미 존재하면 업데이트
-                percentageResult.innerHTML = `출현 확률 : <strong>${formattedPercentage}</strong>`;
-            }
-        }, 500); // 기존 로직이 완료된 후 실행되도록 충분한 지연 시간 설정
-    });
-        
-    // ---------------------------
-    // (8) 새로운 페트 이름 선택 시 기존 결과 초기화
-    // ---------------------------
-    document.getElementById("suggestions").addEventListener("click", (event) => {
-        if (event.target && event.target.nodeName.toLowerCase() === "li") {
-            // 결과 영역 초기화
-            document.getElementById("result").textContent = "";
-            
-            // 'exact-percentage-result'가 존재하면 초기화
-            const exactPercentageResult = document.getElementById("exact-percentage-result");
-            if (exactPercentageResult) {
-                exactPercentageResult.textContent = "";
-            }
-        }
-    // ---------------------------
-    // (9) 확률 포맷 함수 수정
-    // ---------------------------
-    function formatPercentage(num) {
-        if (num === 0) return "0.0%";
-
-        // 숫자를 문자열로 변환 (소수점 아래 20자리까지)
-        let str = num.toFixed(20);
-
-        // 소수점 위치 찾기
-        let decimalIndex = str.indexOf('.');
-        if (decimalIndex === -1) return str + '%';
-
-        // 소수점 첫 번째 비-제로 자리 찾기
-        let firstNonZero = decimalIndex + 1;
-        while (firstNonZero < str.length && str[firstNonZero] === '0') {
-            firstNonZero++;
-        }
-
-        // 모든 소수점 이하가 0인 경우
-        if (firstNonZero === str.length) return "0.0%";
-
-        // 첫 번째 비-제로 자리와 그 다음 자리 추출
-        let digit = str[firstNonZero];
-        let nextDigit = parseInt(str[firstNonZero + 1]) || 0;
-
-        // 다음 자리에서 반올림
-        if (nextDigit >= 5) {
-            // 해당 자리 숫자 올리기
-            let incremented = (parseInt(digit) + 1).toString();
-
-            // 만약 '9'에서 '10'으로 올리는 경우 처리
-            if (incremented === '10') {
-                // 문자열을 배열로 변환하여 처리
-                let strArr = str.split('');
-                let carry = 1;
-                for (let i = firstNonZero; i > decimalIndex; i--) {
-                    if (strArr[i] === '.') continue;
-                    let newDigit = parseInt(strArr[i]) + carry;
-                    if (newDigit === 10) {
-                        strArr[i] = '0';
-                        carry = 1;
+                    let appearString = "";
+                    if (hasBonus || isRebirth) {
+                        appearString = "<strong>--%</strong>"; 
                     } else {
-                        strArr[i] = newDigit.toString();
-                        carry = 0;
-                        break;
+                        const percentage = totalPossibleCases > 0 ? ((exactMatchCount / totalPossibleCases) * 100) : 0.0;
+                        appearString = `<strong>${formatPercentage(percentage)}</strong>`;
                     }
+
+                    wrapper.innerHTML = `
+                        <div style="font-size: 20px; margin-bottom: 12px; color: #2c3e50;" id="final-success-prob">
+                            성공 확률 : <strong style="color: #2980b9;">${displayProbability}%</strong>
+                        </div>
+                        <div style="font-size: 20px; margin-bottom: 12px; color: #2c3e50;" id="final-expect-try">
+                            성공 기대값 : <strong style="color: #e74c3c;">${expectedAttempts === 'ㅠㅠ' ? 'ㅠㅠ' : expectedAttempts + '번'}</strong>
+                        </div>
+                        <div style="font-size: 18px; color: #7f8c8d;" id="final-appear-prob">
+                            출현 확률 : ${appearString}
+                        </div>
+                    `;
                 }
-                // 만약 가장 앞자리까지 캐리가 발생하면 '1' 추가
-                if (carry === 1) {
-                    strArr.unshift('1');
-                    decimalIndex++; // 소수점 위치도 한 칸 이동
-                }
-                str = strArr.join('');
-                digit = str[firstNonZero];
-            } else {
-                // 단순히 자리 올리기
-                str = str.slice(0, firstNonZero) + incremented + str.slice(firstNonZero + 1);
             }
-        }
 
-        // 첫 번째 비-제로 자리까지 자르기
-        let formatted = str.slice(0, firstNonZero + 1) + '%';
-        return formatted;
-    }
-
-    // ---------------------------
-    // (10) 확률 계산 버튼 클릭 시 포맷 함수 적용
-    // ---------------------------
-    // 기존의 calculate 버튼 클릭 이벤트 리스너 내에서
-    // formatPercentage 함수를 사용하는 부분은 그대로 유지됩니다.
-    // 추가적인 수정은 필요하지 않습니다.
+            document.getElementById('status-msg').innerHTML = statusMsg;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result-box').style.display = 'block';
+        }, 50); 
     });
-        
-// ---------------------------
-// (추가 기능) 표기 스탯 입력란 미리보기 기능 (정수 단위 표시)
-// ---------------------------
-document.querySelectorAll('#display-health, #display-attack, #display-defense, #display-agility').forEach((inputField) => {
-    inputField.addEventListener('input', () => {
-        const petName = document.getElementById('pet-name').value.trim(); // 선택된 페트 이름
+</script>
 
-        // 페트 이름이 선택된 상태에서만 작동
-        if (petName && petData[petName]) {
-            const idealStats = calculateIdealStats(petData[petName]); // 정석 스탯 계산
-
-            // 입력란이 비어있는 경우
-            if (inputField.value === "") {
-                // 각 입력란에 맞는 정석 스탯을 placeholder에 정수 단위로 표시
-                inputField.placeholder = (() => {
-                    switch (inputField.id) {
-                        case 'display-health': return Math.round(idealStats.displayHealth).toString();
-                        case 'display-attack': return Math.round(idealStats.displayAttack).toString();
-                        case 'display-defense': return Math.round(idealStats.displayDefense).toString();
-                        case 'display-agility': return Math.round(idealStats.displayAgility).toString();
-                    }
-                })();
-            } else {
-                // 입력된 값이 있을 경우 placeholder를 제거
-                inputField.placeholder = "";
-            }
-        } else {
-            // 페트 이름이 없을 경우 placeholder 제거
-            inputField.placeholder = "";
-        }
-    });
-
-    // 페이지 로드 시에도 초기 상태로 미리보기 적용
-    inputField.dispatchEvent(new Event('input'));
-});
-// ---------------------------
-// (추가) 평균 성공 시행 횟수 추가 (반올림하여 정수로 표시)
-// ---------------------------
-document.getElementById("calculate-btn").addEventListener("click", () => {
-    // 기존 계산 로직이 완료된 후 실행되도록 setTimeout을 사용하여 비동기로 처리
-    setTimeout(() => {
-        const resultElement = document.getElementById("result");
-        const probabilityElement = document.querySelector("#result strong"); // 확률 요소 선택
-
-        if (probabilityElement) {
-            // 확률 값 추출 (소수점 형태로 변환)
-            const probabilityText = probabilityElement.textContent.replace('%', '');
-            const probability = parseFloat(probabilityText) / 100;
-
-            // 평균 성공 시행 값 계산 (반올림하여 정수로 표시)
-            const averageAttempts = probability > 0 ? (1 / probability).toFixed(2) : "ㅠㅠ";
-
-            // 평균 성공 시행 텍스트 추가
-            let averageAttemptsElement = document.getElementById("average-attempts");
-            if (!averageAttemptsElement) {
-                // 기존 요소가 없다면 생성
-                averageAttemptsElement = document.createElement("div");
-                averageAttemptsElement.id = "average-attempts";
-                averageAttemptsElement.style.marginTop = "10px"; // 간격 추가
-                averageAttemptsElement.style.fontSize = "16px";
-                averageAttemptsElement.innerHTML = `성공 기대값 : <strong>${averageAttempts === 'ㅠㅠ' ? 'ㅠㅠ' : averageAttempts + '번'}</strong>`;
-                resultElement.insertBefore(averageAttemptsElement, resultElement.querySelector("#exact-percentage-result"));
-            } else {
-                // 기존 요소가 있다면 내용 업데이트
-                averageAttemptsElement.innerHTML = `성공 시행 : <strong>${averageAttempts}번</strong>`;
-            }
-        }
-    }, 500); // 기존 로직이 완료된 후 실행되도록 충분한 지연 시간 설정
-});
-    </script>
+<script src="https://docs.google.com/spreadsheets/d/16AarhfhhOayiRYP3xOW6VIUVkIf3bcltyEEpgw9lwn4/gviz/tq?tqx=out:json"></script>
 </body>
 </html>
